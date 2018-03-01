@@ -1,21 +1,9 @@
 #pragma once
-// TODO: Make this a build configuration
-#define RAWRTC_DEBUG 1
 
 #include <stdlib.h> // TODO: Why?
 #include <stdbool.h> // bool
 #include <netinet/in.h> // IPPROTO_UDP, IPPROTO_TCP, ...
 #include <openssl/evp.h> // EVP_PKEY
-
-//#define ZF_LOG_LIBRARY_PREFIX rawrtc_
-//#ifdef RAWRTC_DEBUG
-//    #define RAWRTC_ZF_LOG_LEVEL ZF_LOG_DEBUG
-//#else
-//    #define RAWRTC_ZF_LOG_LEVEL ZF_LOG_WARN
-//#endif
-//#include <zf_log.h>
-
-#define RAWRTC_DEBUG_LEVEL 5
 
 #define HAVE_INTTYPES_H
 #include <re.h>
@@ -276,19 +264,6 @@ enum rawrtc_peer_connection_state {
     RAWRTC_PEER_CONNECTION_STATE_FAILED,
     RAWRTC_PEER_CONNECTION_STATE_CLOSED,
 };
-
-
-#ifdef SCTP_REDIRECT_TRANSPORT
-/*
- * SCTP redirect transport states.
- * TODO: Private -> sctp_redirect_transport.h
- */
-enum rawrtc_sctp_redirect_transport_state {
-    RAWRTC_SCTP_REDIRECT_TRANSPORT_STATE_NEW,
-    RAWRTC_SCTP_REDIRECT_TRANSPORT_STATE_OPEN,
-    RAWRTC_SCTP_REDIRECT_TRANSPORT_STATE_CLOSED
-};
-#endif
 
 /*
  * Data transport type.
@@ -784,21 +759,6 @@ struct rawrtc_dtls_transport {
     rawrtc_dtls_transport_receive_handler* receive_handler;
     void* receive_handler_arg;
 };
-
-#ifdef SCTP_REDIRECT_TRANSPORT
-/*
- * Redirect transport.
- */
-struct rawrtc_sctp_redirect_transport {
-    enum rawrtc_sctp_redirect_transport_state state;
-    struct rawrtc_dtls_transport* dtls_transport; // referenced
-    uint16_t local_port;
-    uint16_t remote_port;
-    struct sa redirect_address;
-    struct mbuf* buffer;
-    int socket;
-};
-#endif
 
 /*
  * Generic data transport.
@@ -1544,43 +1504,6 @@ enum rawrtc_code rawrtc_dtls_transport_get_local_parameters(
  * rawrtc_dtls_transport_set_state_change_handler
  * rawrtc_dtls_transport_set_error_handler
  */
-
-#ifdef SCTP_REDIRECT_TRANSPORT
-/*
- * Create an SCTP redirect transport.
- */
-enum rawrtc_code rawrtc_sctp_redirect_transport_create(
-    struct rawrtc_sctp_redirect_transport** const transportp, // de-referenced
-    struct rawrtc_dtls_transport* const dtls_transport, // referenced
-    uint16_t const port, // zeroable
-    char* const redirect_ip, // copied
-    uint16_t const redirect_port
-);
-
-/*
- * Start an SCTP redirect transport.
- */
-enum rawrtc_code rawrtc_sctp_redirect_transport_start(
-    struct rawrtc_sctp_redirect_transport* const transport,
-    struct rawrtc_sctp_capabilities const * const remote_capabilities, // copied
-    uint16_t remote_port // zeroable
-);
-
-/*
- * Stop and close the SCTP redirect transport.
- */
-enum rawrtc_code rawrtc_sctp_redirect_transport_stop(
-    struct rawrtc_sctp_redirect_transport* const transport
-);
-
-/*
- * Get the redirected local SCTP port of the SCTP redirect transport.
- */
-enum rawrtc_code rawrtc_sctp_redirect_transport_get_port(
-    uint16_t* const portp, // de-referenced
-    struct rawrtc_sctp_redirect_transport* const transport
-);
-#endif
 
 /*
  * Create a new SCTP transport capabilities instance.

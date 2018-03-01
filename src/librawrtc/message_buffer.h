@@ -24,9 +24,3 @@ enum rawrtc_code rawrtc_message_buffer_clear(
     rawrtc_message_buffer_handler* const message_handler,
     void* arg
 );
-
-enum rawrtc_code rawrtc_message_buffer_merge(
-    struct mbuf** const bufferp, // de-referenced
-    void** const contextp, // de-referenced
-    struct list* const message_buffer
-);

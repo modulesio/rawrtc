@@ -68,10 +68,6 @@ enum rawrtc_code rawrtc_tls_fingerprint_to_certificate_sign_algorithm(
     enum tls_fingerprint re_algorithm
 );
 
-char const * rawrtc_data_transport_type_to_str(
-    enum rawrtc_data_transport_type const type
-);
-
 char const * rawrtc_ice_candidate_storage_to_str(
     enum rawrtc_ice_candidate_storage const type
 );

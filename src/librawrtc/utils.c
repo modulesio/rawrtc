@@ -868,33 +868,6 @@ enum rawrtc_code rawrtc_str_to_sdp_type(
     return RAWRTC_CODE_NO_VALUE;
 }
 
-static enum rawrtc_data_transport_type const map_enum_data_transport_type[] = {
-    RAWRTC_DATA_TRANSPORT_TYPE_SCTP,
-};
-
-static char const * const map_str_data_transport_type[] = {
-    "SCTP",
-};
-
-static size_t const map_data_transport_type_length = ARRAY_SIZE(map_enum_data_transport_type);
-
-/*
- * Translate a data transport type to str.
- */
-char const * rawrtc_data_transport_type_to_str(
-        enum rawrtc_data_transport_type const type
-) {
-    size_t i;
-
-    for (i = 0; i < map_data_transport_type_length; ++i) {
-        if (map_enum_data_transport_type[i] == type) {
-            return map_str_data_transport_type[i];
-        }
-    }
-
-    return "???";
-}
-
 static enum rawrtc_ice_candidate_storage const map_enum_ice_candidate_storage[] = {
     RAWRTC_ICE_CANDIDATE_STORAGE_RAW,
     RAWRTC_ICE_CANDIDATE_STORAGE_LCAND,
