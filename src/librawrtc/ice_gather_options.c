@@ -20,6 +20,7 @@ static void rawrtc_ice_gather_options_destroy(
 
 /*
  * Create a new ICE gather options instance.
+ * `*optionsp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gather_options_create(
         struct rawrtc_ice_gather_options** const optionsp, // de-referenced

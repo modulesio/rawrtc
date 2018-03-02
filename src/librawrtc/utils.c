@@ -1125,6 +1125,8 @@ enum rawrtc_code rawrtc_list_to_array(
 
 /*
  * Duplicate a string.
+ * `*destinationp` will be set to a copy of `source` and must be
+ * unreferenced.
  */
 enum rawrtc_code rawrtc_strdup(
         char** const destinationp,
@@ -1136,6 +1138,7 @@ enum rawrtc_code rawrtc_strdup(
 
 /*
  * Print a formatted string to a buffer.
+ * `*destinationp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_snprintf(
         char* const destinationp,
@@ -1159,6 +1162,7 @@ enum rawrtc_code rawrtc_snprintf(
 
 /*
  * Print a formatted string to a dynamically allocated buffer.
+ * `*destinationp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sdprintf(
         char** const destinationp,

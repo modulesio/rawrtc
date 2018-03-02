@@ -167,6 +167,7 @@ out:
 
 /*
  * Create an ICE candidate.
+ * `*candidatep` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_candidate_create(
         struct rawrtc_ice_candidate** const candidatep, // de-referenced

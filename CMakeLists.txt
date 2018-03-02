@@ -14,9 +14,11 @@ set(ENV{PKG_CONFIG_PATH} "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/:$ENV{PKG_CONFIG
 # Dependency versions
 set(OPENSSL_VERSION "openssl >= 1.0.2")
 set(LIB_RE_VERSION "libre >= 0.5.7")
-set(LIB_REW_VERISON "librew >= 0.5.0")
+set(LIB_REW_VERSION "librew >= 0.5.0")
+set(LIB_RAWRTCC_VERSION "librawrtcc >= 0.0.1")
 # Note: This MUST be here as cmake 3.5.0 overwrites LIB_RE_VERSION for some reason...
-set(DEPENDENCY_VERSIONS "${OPENSSL_VERSION}, ${LIB_RE_VERSION}, ${LIB_REW_VERISON}")
+set(DEPENDENCY_VERSIONS
+        "${OPENSSL_VERSION}, ${LIB_RE_VERSION}, ${LIB_REW_VERSION}, ${LIB_RAWRTCC_VERSION}")
 
 # Debug build type as default
 if (NOT CMAKE_BUILD_TYPE)
@@ -56,19 +58,19 @@ endif ()
 
 # Dependency: OpenSSL
 pkg_check_modules(LIB_OPENSSL REQUIRED ${OPENSSL_VERSION})
-include_directories(${LIB_OPENSSL_INCLUDE_DIRS})
+include_directories(${LIB_OPENSSL_INCLUDE_DIRS} ${LIB_OPENSSL_INCLUDEDIR})
 link_directories(${LIB_OPENSSL_LIBRARY_DIRS})
 list(APPEND rawrtc_DEP_LIBRARIES ${LIB_OPENSSL_LIBRARIES})
 
 # Dependency: libre
 pkg_check_modules(LIB_RE REQUIRED ${LIB_RE_VERSION})
-include_directories(${LIB_RE_STATIC_INCLUDE_DIRS})
+include_directories(${LIB_RE_STATIC_INCLUDE_DIRS} ${LIB_RE_STATIC_INCLUDEDIR})
 link_directories(${LIB_RE_STATIC_LIBRARY_DIRS})
 list(APPEND rawrtc_DEP_LIBRARIES ${LIB_RE_STATIC_LIBRARIES})
 
 # Dependency: librew
-pkg_check_modules(LIB_REW REQUIRED ${LIB_REW_VERISON})
-include_directories(${LIB_REW_STATIC_INCLUDE_DIRS})
+pkg_check_modules(LIB_REW REQUIRED ${LIB_REW_VERSION})
+include_directories(${LIB_REW_STATIC_INCLUDE_DIRS} ${LIB_REW_STATIC_INCLUDEDIR})
 link_directories(${LIB_REW_STATIC_LIBRARY_DIRS})
 list(APPEND rawrtc_DEP_LIBRARIES ${LIB_REW_STATIC_LIBRARIES})
 
@@ -80,6 +82,12 @@ get_filename_component(LIB_USRSCTP_LIBRARY_DIRS ${LIB_USRSCTP_LIBRARIES} DIRECTO
 include_directories(${LIB_USRSCTP_INCLUDE_DIRS})
 link_directories(${LIB_USRSCTP_LIBRARY_DIRS})
 list(APPEND rawrtc_DEP_LIBRARIES ${LIB_USRSCTP_LIBRARIES})
+
+# Dependency: librawrtcc
+pkg_check_modules(LIB_RAWRTCC REQUIRED ${LIB_RAWRTCC_VERSION})
+include_directories(${LIB_RAWRTCC_STATIC_INCLUDE_DIRS} ${LIB_RAWRTCC_INCLUDEDIR})
+link_directories(${LIB_RAWRTCC_STATIC_LIBRARY_DIRS})
+list(APPEND rawrtc_DEP_LIBRARIES ${LIB_RAWRTCC_STATIC_LIBRARIES})
 
 # Dependency versions
 set(PKG_CONFIG_REQUIRES "")

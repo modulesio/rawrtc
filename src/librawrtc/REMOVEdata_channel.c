@@ -1,30 +1,10 @@
 #include <rawrtc.h>
 #include "utils.h"
-#include "data_transport.h"
+#include "REMOVEdata_transport.h"
 
 #define DEBUG_MODULE "data-channel"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
 #include "debug.h"
-
-/*
- * Get the corresponding name for a data channel state.
- */
-char const * const rawrtc_data_channel_state_to_name(
-        enum rawrtc_data_channel_state const state
-) {
-    switch (state) {
-        case RAWRTC_DATA_CHANNEL_STATE_CONNECTING:
-            return "connecting";
-        case RAWRTC_DATA_CHANNEL_STATE_OPEN:
-            return "open";
-        case RAWRTC_DATA_CHANNEL_STATE_CLOSING:
-            return "closing";
-        case RAWRTC_DATA_CHANNEL_STATE_CLOSED:
-            return "closed";
-        default:
-            return "???";
-    }
-}
 
 /*
  * Change the state of the data channel.
@@ -190,6 +170,7 @@ void rawrtc_data_channel_call_channel_handler(
 
 /*
  * Create a data channel.
+ * `*channelp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_data_channel_create(
         struct rawrtc_data_channel** const channelp, // de-referenced
@@ -358,6 +339,7 @@ enum rawrtc_code rawrtc_data_channel_unset_handlers(
 
 /*
  * Get the data channel's parameters.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_data_channel_get_parameters(
         struct rawrtc_data_channel_parameters** const parametersp, // de-referenced
@@ -565,5 +547,25 @@ enum rawrtc_code rawrtc_data_channel_get_message_handler(
         return RAWRTC_CODE_SUCCESS;
     } else {
         return RAWRTC_CODE_NO_VALUE;
+    }
+}
+
+/*
+ * Get the corresponding name for a data channel state.
+ */
+char const * const rawrtc_data_channel_state_to_name(
+        enum rawrtc_data_channel_state const state
+) {
+    switch (state) {
+        case RAWRTC_DATA_CHANNEL_STATE_CONNECTING:
+            return "connecting";
+        case RAWRTC_DATA_CHANNEL_STATE_OPEN:
+            return "open";
+        case RAWRTC_DATA_CHANNEL_STATE_CLOSING:
+            return "closing";
+        case RAWRTC_DATA_CHANNEL_STATE_CLOSED:
+            return "closed";
+        default:
+            return "???";
     }
 }

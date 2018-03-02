@@ -12,9 +12,9 @@
 #include "utils.h"
 #include "message_buffer.h"
 #include "dtls_transport.h"
-#include "data_transport.h"
-#include "data_channel_parameters.h"
-#include "sctp_transport.h"
+#include "REMOVEdata_transport.h"
+#include "REMOVEdata_channel_parameters.h"
+#include "REMOVEsctp_transport.h"
 
 #define DEBUG_MODULE "sctp-transport"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
@@ -254,26 +254,6 @@ static enum rawrtc_code data_channel_ack_message_create(
         // Set pointer & done
         *bufferp = buffer;
         return RAWRTC_CODE_SUCCESS;
-    }
-}
-
-/*
- * Get the corresponding name for an SCTP transport state.
- */
-char const * const rawrtc_sctp_transport_state_to_name(
-        enum rawrtc_sctp_transport_state const state
-) {
-    switch (state) {
-        case RAWRTC_SCTP_TRANSPORT_STATE_NEW:
-            return "new";
-        case RAWRTC_SCTP_TRANSPORT_STATE_CONNECTING:
-            return "connecting";
-        case RAWRTC_SCTP_TRANSPORT_STATE_CONNECTED:
-            return "connected";
-        case RAWRTC_SCTP_TRANSPORT_STATE_CLOSED:
-            return "closed";
-        default:
-            return "???";
     }
 }
 
@@ -1940,6 +1920,7 @@ static void rawrtc_sctp_transport_destroy(
 
 /*
  * Create an SCTP transport.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_transport_create(
         struct rawrtc_sctp_transport** const transportp, // de-referenced
@@ -2589,6 +2570,7 @@ out:
 
 /*
  * Get the SCTP data transport instance.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_transport_get_data_transport(
         struct rawrtc_data_transport** const transportp, // de-referenced
@@ -2943,4 +2925,24 @@ enum rawrtc_code rawrtc_sctp_transport_get_port(
 
     // Done
     return RAWRTC_CODE_SUCCESS;
+}
+
+/*
+ * Get the corresponding name for an SCTP transport state.
+ */
+char const * const rawrtc_sctp_transport_state_to_name(
+        enum rawrtc_sctp_transport_state const state
+) {
+    switch (state) {
+        case RAWRTC_SCTP_TRANSPORT_STATE_NEW:
+            return "new";
+        case RAWRTC_SCTP_TRANSPORT_STATE_CONNECTING:
+            return "connecting";
+        case RAWRTC_SCTP_TRANSPORT_STATE_CONNECTED:
+            return "connected";
+        case RAWRTC_SCTP_TRANSPORT_STATE_CLOSED:
+            return "closed";
+        default:
+            return "???";
+    }
 }

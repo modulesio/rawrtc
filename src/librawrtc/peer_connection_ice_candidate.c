@@ -240,6 +240,7 @@ out:
 
 /*
  * Create a new ICE candidate from SDP.
+ * `*candidatesp` must be unreferenced.
  *
  * Note: This is equivalent to creating an `RTCIceCandidate` from an
  *       `RTCIceCandidateInit` instance in the W3C WebRTC
@@ -422,6 +423,9 @@ out:
 /*
  * Get the media stream identification tag the ICE candidate is
  * associated to.
+ * `*midp` will be set to a copy of the candidate's mid and must be
+ * unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no 'mid' has been set.
  * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*midp* must
  * be unreferenced.
@@ -468,6 +472,9 @@ enum rawrtc_code rawrtc_peer_connection_ice_candidate_get_sdp_media_line_index(
 
 /*
  * Get the username fragment the ICE candidate is associated to.
+ * `*username_fragmentp` will be set to a copy of the candidate's
+ * username fragment and must be unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no username fragment has been
  * set. Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and
  * `*username_fragmentp* must be unreferenced.

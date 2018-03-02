@@ -9,6 +9,7 @@
 #include <re.h>
 #include <rew.h>
 #include <usrsctp.h>
+#include <rawrtcc.h>
 
 /*
  * Version
@@ -19,59 +20,6 @@
  * TODO: Find a way to keep this in sync with the one in CMakeLists.txt
  */
 #define RAWRTC_VERSION "0.2.1"
-
-/*
- * Return codes.
- */
-enum rawrtc_code {
-    RAWRTC_CODE_UNKNOWN_ERROR = -2,
-    RAWRTC_CODE_NOT_IMPLEMENTED = -1,
-    RAWRTC_CODE_SUCCESS = 0,
-    RAWRTC_CODE_INITIALISE_FAIL,
-    RAWRTC_CODE_INVALID_ARGUMENT,
-    RAWRTC_CODE_NO_MEMORY,
-    RAWRTC_CODE_INVALID_STATE,
-    RAWRTC_CODE_UNSUPPORTED_PROTOCOL,
-    RAWRTC_CODE_UNSUPPORTED_ALGORITHM,
-    RAWRTC_CODE_NO_VALUE,
-    RAWRTC_CODE_NO_SOCKET,
-    RAWRTC_CODE_INVALID_CERTIFICATE,
-    RAWRTC_CODE_INVALID_FINGERPRINT,
-    RAWRTC_CODE_INSUFFICIENT_SPACE,
-    RAWRTC_CODE_STILL_IN_USE,
-    RAWRTC_CODE_INVALID_MESSAGE,
-    RAWRTC_CODE_MESSAGE_TOO_LONG,
-    RAWRTC_CODE_TRY_AGAIN_LATER,
-    RAWRTC_CODE_STOP_ITERATION,
-    RAWRTC_CODE_NOT_PERMITTED,
-}; // IMPORTANT: Add translations for new return codes in `utils.c`!
-
-/*
- * Certificate private key types.
- */
-enum rawrtc_certificate_key_type {
-    RAWRTC_CERTIFICATE_KEY_TYPE_RSA = TLS_KEYTYPE_RSA,
-    RAWRTC_CERTIFICATE_KEY_TYPE_EC = TLS_KEYTYPE_EC
-};
-
-/*
- * Certificate signing hash algorithms.
- */
-enum rawrtc_certificate_sign_algorithm {
-    RAWRTC_CERTIFICATE_SIGN_ALGORITHM_NONE = 0,
-    RAWRTC_CERTIFICATE_SIGN_ALGORITHM_SHA256 = TLS_FINGERPRINT_SHA256,
-    RAWRTC_CERTIFICATE_SIGN_ALGORITHM_SHA384,
-    RAWRTC_CERTIFICATE_SIGN_ALGORITHM_SHA512
-};
-
-/*
- * Certificate encoding.
- */
-enum rawrtc_certificate_encode {
-    RAWRTC_CERTIFICATE_ENCODE_CERTIFICATE,
-    RAWRTC_CERTIFICATE_ENCODE_PRIVATE_KEY,
-    RAWRTC_CERTIFICATE_ENCODE_BOTH
-};
 
 /*
  * SDP type.
@@ -999,19 +947,31 @@ struct rawrtc_dtls_fingerprints {
 /*
  * Initialise rawrtc. Must be called before making a call to any other
  * function.
+ *
+ * Note: In case `init_re` is not set to `true`, you MUST initialise
+ *       re yourselves before calling this function.
  */
-enum rawrtc_code rawrtc_init();
+enum rawrtc_code rawrtc_init(
+    bool const init_re
+);
 
 /*
  * Close rawrtc and free up all resources.
+ *
+ * Note: In case `close_re` is not set to `true`, you MUST close
+ *       re yourselves.
  */
-enum rawrtc_code rawrtc_close();
+enum rawrtc_code rawrtc_close(
+    bool const close_re
+);
 
 /*
  * Create certificate options.
  *
  * All arguments but `key_type` are optional. Sane and safe default
  * values will be applied, don't worry!
+ *
+ * `*optionsp` must be unreferenced.
  *
  * If `common_name` is `NULL` the default common name will be applied.
  * If `valid_until` is `0` the default certificate lifetime will be
@@ -1037,6 +997,8 @@ enum rawrtc_code rawrtc_certificate_options_create(
  *
  * Sane and safe default options will be applied if `options` is
  * `NULL`.
+ *
+ * `*certificatep` must be unreferenced.
  */
 enum rawrtc_code rawrtc_certificate_generate(
     struct rawrtc_certificate** const certificatep,
@@ -1053,6 +1015,7 @@ enum rawrtc_code rawrtc_certificate_generate(
 
 /*
  * Create an ICE candidate.
+ * `*candidatep` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_candidate_create(
     struct rawrtc_ice_candidate** const candidatep, // de-referenced
@@ -1121,7 +1084,7 @@ enum rawrtc_code rawrtc_ice_candidate_get_type(
 
 /*
  * Get the ICE candidate's TCP type.
- * `*typep` will be set to `NULL` in case the protocol is not TCP.
+ * Return `RAWRTC_CODE_NO_VALUE` in case the protocol is not TCP.
  */
 enum rawrtc_code rawrtc_ice_candidate_get_tcp_type(
     enum rawrtc_ice_tcp_candidate_type* typep, // de-referenced
@@ -1131,7 +1094,9 @@ enum rawrtc_code rawrtc_ice_candidate_get_tcp_type(
 /*
  * Get the ICE candidate's related IP address.
  * `*related_address` will be set to a copy of the related address that
- * must be unreferenced or `NULL` in case no related address exists.
+ * must be unreferenced.
+ *
+ * Return `RAWRTC_CODE_NO_VALUE` in case no related address exists.
  */
 enum rawrtc_code rawrtc_ice_candidate_get_related_address(
     char** const related_addressp, // de-referenced
@@ -1141,7 +1106,9 @@ enum rawrtc_code rawrtc_ice_candidate_get_related_address(
 /*
  * Get the ICE candidate's related IP address' port.
  * `*related_portp` will be set to a copy of the related address'
- * port or `0` in case no related address exists.
+ * port.
+ *
+ * Return `RAWRTC_CODE_NO_VALUE` in case no related port exists.
  */
 enum rawrtc_code rawrtc_ice_candidate_get_related_port(
     uint16_t* const related_portp, // de-referenced
@@ -1150,6 +1117,7 @@ enum rawrtc_code rawrtc_ice_candidate_get_related_port(
 
 /*
  * Create a new ICE parameters instance.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_parameters_create(
     struct rawrtc_ice_parameters** const parametersp, // de-referenced
@@ -1186,6 +1154,7 @@ enum rawrtc_code rawrtc_ice_parameters_get_ice_lite(
 
 /*
  * Create a new ICE gather options instance.
+ * `*optionsp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gather_options_create(
     struct rawrtc_ice_gather_options** const optionsp, // de-referenced
@@ -1217,15 +1186,9 @@ enum rawrtc_code rawrtc_ice_gather_options_add_server(
  */
 
 /*
- * Get the corresponding name for an ICE gatherer state.
+ * Create a new ICE gatherer.
+ * `*gathererp` must be unreferenced.
  */
-char const * const rawrtc_ice_gatherer_state_to_name(
-    enum rawrtc_ice_gatherer_state const state
-);
-
- /*
-  * Create a new ICE gatherer.
-  */
 enum rawrtc_code rawrtc_ice_gatherer_create(
     struct rawrtc_ice_gatherer** const gathererp, // de-referenced
     struct rawrtc_ice_gather_options* const options, // referenced
@@ -1265,6 +1228,7 @@ enum rawrtc_code rawrtc_ice_gatherer_get_state(
 
 /*
  * Get local ICE parameters of an ICE gatherer.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gatherer_get_local_parameters(
     struct rawrtc_ice_parameters** const parametersp, // de-referenced
@@ -1273,6 +1237,7 @@ enum rawrtc_code rawrtc_ice_gatherer_get_local_parameters(
 
 /*
  * Get local ICE candidates of an ICE gatherer.
+ * `*candidatesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gatherer_get_local_candidates(
     struct rawrtc_ice_candidates** const candidatesp, // de-referenced
@@ -1288,14 +1253,15 @@ enum rawrtc_code rawrtc_ice_gatherer_get_local_candidates(
  */
 
 /*
- * Get the corresponding name for an ICE transport state.
+ * Get the corresponding name for an ICE gatherer state.
  */
-char const * const rawrtc_ice_transport_state_to_name(
-    enum rawrtc_ice_transport_state const state
+char const * const rawrtc_ice_gatherer_state_to_name(
+    enum rawrtc_ice_gatherer_state const state
 );
 
 /*
  * Create a new ICE transport.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_transport_create(
     struct rawrtc_ice_transport** const transportp, // de-referenced
@@ -1381,7 +1347,15 @@ enum rawrtc_code rawrtc_ice_transport_set_remote_candidates(
  */
 
 /*
+ * Get the corresponding name for an ICE transport state.
+ */
+char const * const rawrtc_ice_transport_state_to_name(
+    enum rawrtc_ice_transport_state const state
+);
+
+/*
  * Create a new DTLS fingerprint instance.
+ * `*fingerprintp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_dtls_fingerprint_create(
     struct rawrtc_dtls_fingerprint** const fingerprintp, // de-referenced
@@ -1397,6 +1371,7 @@ enum rawrtc_code rawrtc_dtls_fingerprint_create(
 
 /*
  * Create a new DTLS parameters instance.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_dtls_parameters_create(
     struct rawrtc_dtls_parameters** const parametersp, // de-referenced
@@ -1440,14 +1415,8 @@ enum rawrtc_code rawrtc_dtls_parameters_fingerprint_get_value(
 );
 
 /*
-* Get the corresponding name for an ICE transport state.
-*/
-char const * const rawrtc_dtls_transport_state_to_name(
-    enum rawrtc_dtls_transport_state const state
-);
-
-/*
  * Create a new DTLS transport.
+ * `*transport` must be unreferenced.
  */
 enum rawrtc_code rawrtc_dtls_transport_create(
     struct rawrtc_dtls_transport** const transportp, // de-referenced
@@ -1491,6 +1460,7 @@ enum rawrtc_code rawrtc_dtls_transport_get_state(
 
 /*
  * Get local DTLS parameters of a transport.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_dtls_transport_get_local_parameters(
     struct rawrtc_dtls_parameters** const parametersp, // de-referenced
@@ -1506,30 +1476,32 @@ enum rawrtc_code rawrtc_dtls_transport_get_local_parameters(
  */
 
 /*
+* Get the corresponding name for an ICE transport state.
+*/
+char const * const rawrtc_dtls_transport_state_to_name(
+    enum rawrtc_dtls_transport_state const state
+);
+
+/*
  * Create a new SCTP transport capabilities instance.
+ * `*capabilitiesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_capabilities_create(
-        struct rawrtc_sctp_capabilities** const capabilitiesp, // de-referenced
-        uint64_t const max_message_size
+    struct rawrtc_sctp_capabilities** const capabilitiesp, // de-referenced
+    uint64_t const max_message_size
 );
 
 /*
  * Get the SCTP parameter's maximum message size value.
  */
 enum rawrtc_code rawrtc_sctp_capabilities_get_max_message_size(
-        uint64_t* const max_message_sizep, // de-referenced
-        struct rawrtc_sctp_capabilities* const capabilities
-);
-
-/*
- * Get the corresponding name for an SCTP transport state.
- */
-char const * const rawrtc_sctp_transport_state_to_name(
-    enum rawrtc_sctp_transport_state const state
+    uint64_t* const max_message_sizep, // de-referenced
+    struct rawrtc_sctp_capabilities* const capabilities
 );
 
 /*
  * Create an SCTP transport.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_transport_create(
     struct rawrtc_sctp_transport** const transportp, // de-referenced
@@ -1542,6 +1514,7 @@ enum rawrtc_code rawrtc_sctp_transport_create(
 
 /*
  * Get the SCTP data transport instance.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_transport_get_data_transport(
     struct rawrtc_data_transport** const transportp, // de-referenced
@@ -1579,7 +1552,15 @@ enum rawrtc_code rawrtc_sctp_transport_get_port(
 );
 
 /*
+ * Get the corresponding name for an SCTP transport state.
+ */
+char const * const rawrtc_sctp_transport_state_to_name(
+    enum rawrtc_sctp_transport_state const state
+);
+
+/*
  * Get the local SCTP transport capabilities (static).
+ * `*capabilitiesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sctp_transport_get_capabilities(
     struct rawrtc_sctp_capabilities** const capabilitiesp // de-referenced
@@ -1604,6 +1585,8 @@ enum rawrtc_code rawrtc_sctp_transport_get_capabilities(
  * parameter specifies the time window in milliseconds during which
  * (re-)transmissions may occur before the message is being discarded.
  *
+ * `*parametersp` must be unreferenced.
+ *
  * In case `negotiated` is set to `false`, the `id` is being ignored.
  */
 enum rawrtc_code rawrtc_data_channel_parameters_create(
@@ -1618,6 +1601,9 @@ enum rawrtc_code rawrtc_data_channel_parameters_create(
 
 /*
  * Get the label from the data channel parameters.
+ * `*labelp` will be set to a copy of the parameter's label and must be
+ * unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no label has been set.
  * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*parameters*
  * must be unreferenced.
@@ -1635,6 +1621,9 @@ enum rawrtc_code rawrtc_data_channel_parameters_get_label(
 
 /*
  * Get the protocol from the data channel parameters.
+ * `*protocolp` will be set to a copy of the parameter's protocol and
+ * must be unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no protocol has been set.
  * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*protocolp*
  * must be unreferenced.
@@ -1653,10 +1642,13 @@ enum rawrtc_code rawrtc_data_channel_parameters_get_protocol(
 /*
  * Create data channel options.
  *
- * - `deliver_partially`: Enable this if you want to receive partial
- *   messages. Disable if messages should arrive complete. If enabled,
- *   message chunks will be delivered until the message is complete.
- *   Other messages' chunks WILL NOT be interleaved on the same channel.
+ * `*optionsp` must be unreferenced.
+ *
+ * If `deliver_partially` is set to `true`, you will receive partial
+ * messages. If set to `false`, messages will be reassembled before
+ * delivery. If enabled, message chunks will be delivered until the
+ * message is complete. Other messages' chunks WILL NOT be interleaved
+ * on the same channel.
  */
 enum rawrtc_code rawrtc_data_channel_options_create(
     struct rawrtc_data_channel_options** const optionsp, // de-referenced
@@ -1664,14 +1656,8 @@ enum rawrtc_code rawrtc_data_channel_options_create(
 );
 
 /*
- * Get the corresponding name for a data channel state.
- */
-char const * const rawrtc_data_channel_state_to_name(
-    enum rawrtc_data_channel_state const state
-);
-
-/*
  * Create a data channel.
+ * `*channelp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_data_channel_create(
     struct rawrtc_data_channel** const channelp, // de-referenced
@@ -1742,6 +1728,7 @@ enum rawrtc_code rawrtc_data_channel_unset_handlers(
 
 /*
  * Get the data channel's parameters.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_data_channel_get_parameters(
     struct rawrtc_data_channel_parameters** const parametersp, // de-referenced
@@ -1834,6 +1821,13 @@ enum rawrtc_code rawrtc_data_channel_get_message_handler(
 );
 
 /*
+ * Get the corresponding name for a data channel state.
+ */
+char const * const rawrtc_data_channel_state_to_name(
+    enum rawrtc_data_channel_state const state
+);
+
+/*
  * Get the corresponding name for a signaling state.
  */
 char const * const rawrtc_signaling_state_to_name(
@@ -1849,6 +1843,7 @@ char const * const rawrtc_peer_connection_state_to_name(
 
 /*
  * Create a new peer connection configuration.
+ * `*configurationp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_create(
     struct rawrtc_peer_connection_configuration** const configurationp, // de-referenced
@@ -1869,6 +1864,7 @@ enum rawrtc_code rawrtc_peer_connection_configuration_add_ice_server(
 
 /*
  * Get ICE servers from the peer connection configuration.
+ * `*serversp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_get_ice_servers(
     struct rawrtc_ice_servers** const serversp, // de-referenced
@@ -1886,6 +1882,7 @@ enum rawrtc_code rawrtc_peer_connection_configuration_add_certificate(
 
 /*
  * Get certificates from the peer connection configuration.
+ * `*certificatesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_get_certificates(
     struct rawrtc_certificates** const certificatesp, // de-referenced
@@ -1903,6 +1900,7 @@ enum rawrtc_code rawrtc_peer_connection_configuration_set_sctp_sdp_05(
 
 /*
  * Create a description by parsing it from SDP.
+ * `*descriptionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_description_create(
     struct rawrtc_peer_connection_description** const descriptionp, // de-referenced
@@ -1929,6 +1927,7 @@ enum rawrtc_code rawrtc_peer_connection_description_get_sdp(
 
 /*
  * Create a new ICE candidate from SDP.
+ * `*candidatesp` must be unreferenced.
  *
  * Note: This is equivalent to creating an `RTCIceCandidate` from an
  *       `RTCIceCandidateInit` instance in the W3C WebRTC
@@ -1958,6 +1957,9 @@ enum rawrtc_code rawrtc_peer_connection_ice_candidate_get_sdp(
 /*
  * Get the media stream identification tag the ICE candidate is
  * associated to.
+ * `*midp` will be set to a copy of the candidate's mid and must be
+ * unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no 'mid' has been set.
  * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*midp* must
  * be unreferenced.
@@ -1979,6 +1981,9 @@ enum rawrtc_code rawrtc_peer_connection_ice_candidate_get_sdp_media_line_index(
 
 /*
  * Get the username fragment the ICE candidate is associated to.
+ * `*username_fragmentp` will be set to a copy of the candidate's
+ * username fragment and must be unreferenced.
+ *
  * Return `RAWRTC_CODE_NO_VALUE` in case no username fragment has been
  * set. Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and
  * `*username_fragmentp* must be unreferenced.
@@ -1999,6 +2004,7 @@ enum rawrtc_code rawrtc_peer_connection_ice_candidate_get_ortc_candidate(
 
 /*
  * Create a new peer connection.
+ * `*connectionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create(
     struct rawrtc_peer_connection** const connectionp, // de-referenced
@@ -2023,8 +2029,9 @@ enum rawrtc_code rawrtc_peer_connection_close(
 );
 
 /*
-* Create an offer.
-*/
+ * Create an offer.
+ * `*descriptionp` must be unreferenced.
+ */
 enum rawrtc_code rawrtc_peer_connection_create_offer(
     struct rawrtc_peer_connection_description** const descriptionp, // de-referenced
     struct rawrtc_peer_connection* const connection,
@@ -2033,6 +2040,7 @@ enum rawrtc_code rawrtc_peer_connection_create_offer(
 
 /*
  * Create an answer.
+ * `*descriptionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create_answer(
     struct rawrtc_peer_connection_description** const descriptionp, // de-referenced
@@ -2131,6 +2139,7 @@ enum rawrtc_code rawrtc_peer_connection_can_trickle_ice_candidates(
 
 /*
  * Create a data channel on a peer connection.
+ * `*channelp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create_data_channel(
     struct rawrtc_data_channel** const channelp, // de-referenced
@@ -2443,6 +2452,8 @@ enum rawrtc_code rawrtc_str_to_sdp_type(
 
 /*
  * Duplicate a string.
+ * `*destinationp` will be set to a copy of `source` and must be
+ * unreferenced.
  */
 enum rawrtc_code rawrtc_strdup(
     char** const destinationp,
@@ -2461,6 +2472,7 @@ enum rawrtc_code rawrtc_snprintf(
 
 /*
  * Print a formatted string to a dynamically allocated buffer.
+ * `*destinationp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_sdprintf(
     char** const destinationp,

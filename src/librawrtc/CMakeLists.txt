@@ -1,11 +1,10 @@
 # Library sources
 set(rawrtc_SOURCES
         candidate_helper.c
-        certificate.c
-        data_channel.c
-        data_channel_options.c
-        data_channel_parameters.c
-        data_transport.c
+        REMOVEdata_channel.c
+        REMOVEdata_channel_options.c
+        REMOVEdata_channel_parameters.c
+        REMOVEdata_transport.c
         dtls_parameters.c
         dtls_transport.c
         ice_candidate.c
@@ -15,23 +14,21 @@ set(rawrtc_SOURCES
         ice_server.c
         ice_transport.c
         main.c
-        message_buffer.c
         peer_connection.c
         peer_connection_configuration.c
         peer_connection_description.c
         peer_connection_ice_candidate.c
         peer_connection_states.c
-        sctp_capabilities.c
-        sctp_transport.c
+        REMOVEsctp_capabilities.c
+        REMOVEsctp_transport.c
         utils.c)
 
 # Library internal headers
 set(rawrtc_HEADERS
         candidate_helper.h
-        certificate.h
-        data_channel_options.h
-        data_channel_parameters.h
-        data_transport.h
+        REMOVEdata_channel_options.h
+        REMOVEdata_channel_parameters.h
+        REMOVEdata_transport.h
         dtls_parameters.h
         dtls_transport.h
         ice_candidate.h
@@ -41,14 +38,13 @@ set(rawrtc_HEADERS
         ice_server.h
         ice_transport.h
         main.h
-        message_buffer.h
         peer_connection.h
         peer_connection_configuration.h
         peer_connection_description.h
         peer_connection_ice_candidate.h
         peer_connection_states.h
-        sctp_capabilities.h
-        sctp_transport.h
+        REMOVEsctp_capabilities.h
+        REMOVEsctp_transport.h
         utils.h)
 
 # Setup library (link & install)

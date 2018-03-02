@@ -2,8 +2,8 @@
 #include <rawrtc.h>
 #include "ice_parameters.h"
 #include "dtls_parameters.h"
-#include "sctp_capabilities.h"
-#include "sctp_transport.h"
+#include "REMOVEsctp_capabilities.h"
+#include "REMOVEsctp_transport.h"
 #include "peer_connection_description.h"
 #include "peer_connection_ice_candidate.h"
 
@@ -924,6 +924,7 @@ int rawrtc_peer_connection_description_debug(
 
 /*
  * Create a description by parsing it from SDP.
+ * `*descriptionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_description_create(
         struct rawrtc_peer_connection_description** const descriptionp, // de-referenced

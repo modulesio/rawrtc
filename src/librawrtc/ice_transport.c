@@ -8,32 +8,6 @@
 #include "debug.h"
 
 /*
- * Get the corresponding name for an ICE transport state.
- */
-char const * const rawrtc_ice_transport_state_to_name(
-        enum rawrtc_ice_transport_state const state
-) {
-    switch (state) {
-        case RAWRTC_ICE_TRANSPORT_STATE_NEW:
-            return "new";
-        case RAWRTC_ICE_TRANSPORT_STATE_CHECKING:
-            return "checking";
-        case RAWRTC_ICE_TRANSPORT_STATE_CONNECTED:
-            return "connected";
-        case RAWRTC_ICE_TRANSPORT_STATE_COMPLETED:
-            return "completed";
-        case RAWRTC_ICE_TRANSPORT_STATE_DISCONNECTED:
-            return "disconnected";
-        case RAWRTC_ICE_TRANSPORT_STATE_FAILED:
-            return "failed";
-        case RAWRTC_ICE_TRANSPORT_STATE_CLOSED:
-            return "closed";
-        default:
-            return "???";
-    }
-}
-
-/*
  * Destructor for an existing ICE transport.
  */
 static void rawrtc_ice_transport_destroy(
@@ -52,6 +26,7 @@ static void rawrtc_ice_transport_destroy(
 
 /*
  * Create a new ICE transport.
+ * `*transportp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_transport_create(
         struct rawrtc_ice_transport** const transportp, // de-referenced
@@ -594,4 +569,30 @@ enum rawrtc_code rawrtc_ice_transport_set_remote_candidates(
 
     // Done
     return RAWRTC_CODE_SUCCESS;
+}
+
+/*
+ * Get the corresponding name for an ICE transport state.
+ */
+char const * const rawrtc_ice_transport_state_to_name(
+        enum rawrtc_ice_transport_state const state
+) {
+    switch (state) {
+        case RAWRTC_ICE_TRANSPORT_STATE_NEW:
+            return "new";
+        case RAWRTC_ICE_TRANSPORT_STATE_CHECKING:
+            return "checking";
+        case RAWRTC_ICE_TRANSPORT_STATE_CONNECTED:
+            return "connected";
+        case RAWRTC_ICE_TRANSPORT_STATE_COMPLETED:
+            return "completed";
+        case RAWRTC_ICE_TRANSPORT_STATE_DISCONNECTED:
+            return "disconnected";
+        case RAWRTC_ICE_TRANSPORT_STATE_FAILED:
+            return "failed";
+        case RAWRTC_ICE_TRANSPORT_STATE_CLOSED:
+            return "closed";
+        default:
+            return "???";
+    }
 }

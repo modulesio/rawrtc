@@ -11,14 +11,23 @@ struct rawrtc_global rawrtc_global;
 /*
  * Initialise rawrtc. Must be called before making a call to any other
  * function.
+ *
+ * Note: In case `init_re` is not set to `true`, you MUST initialise
+ *       re yourselves before calling this function.
  */
-enum rawrtc_code rawrtc_init() {
+enum rawrtc_code rawrtc_init(
+        bool const init_re
+) {
     int err;
     pthread_mutexattr_t mutex_attribute;
 
-    // Initialise re
-    if (libre_init()) {
-        return RAWRTC_CODE_INITIALISE_FAIL;
+    // TODO: Initialise rawrtcdc
+
+    // Initialise re (if requested)
+    if (init_re) {
+        if (libre_init()) {
+            return RAWRTC_CODE_INITIALISE_FAIL;
+        }
     }
 
     // Initialise and set mutex attribute
@@ -54,8 +63,13 @@ enum rawrtc_code rawrtc_init() {
 
 /*
  * Close rawrtc and free up all resources.
+ *
+ * Note: In case `close_re` is not set to `true`, you MUST close
+ *       re yourselves.
  */
-enum rawrtc_code rawrtc_close() {
+enum rawrtc_code rawrtc_close(
+        bool const close_re
+) {
     int err;
 
     // TODO: Close usrsctp if initialised
@@ -66,8 +80,10 @@ enum rawrtc_code rawrtc_close() {
         DEBUG_WARNING("Failed to destroy mutex, reason: %m\n", err);
     }
 
-    // Close re
-    libre_close();
+    // Close re (if requested)
+    if (close_re) {
+        libre_close();
+    }
 
     // Done
     return RAWRTC_CODE_SUCCESS;

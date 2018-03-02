@@ -1,5 +1,4 @@
 #pragma once
-#include <rawrtc.h>
 
 /*
  * Global rawrtc vars.

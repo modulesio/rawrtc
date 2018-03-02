@@ -16,26 +16,6 @@
 #include "debug.h"
 
 /*
- * Get the corresponding name for an ICE gatherer state.
- */
-char const * const rawrtc_ice_gatherer_state_to_name(
-        enum rawrtc_ice_gatherer_state const state
-) {
-    switch (state) {
-        case RAWRTC_ICE_GATHERER_STATE_NEW:
-            return "new";
-        case RAWRTC_ICE_GATHERER_STATE_GATHERING:
-            return "gathering";
-        case RAWRTC_ICE_GATHERER_STATE_COMPLETE:
-            return "complete";
-        case RAWRTC_ICE_GATHERER_STATE_CLOSED:
-            return "closed";
-        default:
-            return "???";
-    }
-}
-
-/*
  * Destructor for an existing ICE gatherer.
  */
 static void rawrtc_ice_gatherer_destroy(
@@ -57,6 +37,7 @@ static void rawrtc_ice_gatherer_destroy(
 
 /*
  * Create a new ICE gatherer.
+ * `*gathererp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gatherer_create(
         struct rawrtc_ice_gatherer** const gathererp, // de-referenced
@@ -1073,6 +1054,7 @@ enum rawrtc_code rawrtc_ice_gatherer_get_state(
 
 /*
  * Get local ICE parameters of an ICE gatherer.
+ * `*parametersp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gatherer_get_local_parameters(
         struct rawrtc_ice_parameters** const parametersp, // de-referenced
@@ -1110,6 +1092,7 @@ static void rawrtc_ice_gatherer_local_candidates_destroy(
 
 /*
  * Get local ICE candidates of an ICE gatherer.
+ * `*candidatesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_ice_gatherer_get_local_candidates(
         struct rawrtc_ice_candidates** const candidatesp, // de-referenced
@@ -1157,4 +1140,24 @@ out:
         *candidatesp = candidates;
     }
     return error;
+}
+
+/*
+ * Get the corresponding name for an ICE gatherer state.
+ */
+char const * const rawrtc_ice_gatherer_state_to_name(
+        enum rawrtc_ice_gatherer_state const state
+) {
+    switch (state) {
+        case RAWRTC_ICE_GATHERER_STATE_NEW:
+            return "new";
+        case RAWRTC_ICE_GATHERER_STATE_GATHERING:
+            return "gathering";
+        case RAWRTC_ICE_GATHERER_STATE_COMPLETE:
+            return "complete";
+        case RAWRTC_ICE_GATHERER_STATE_CLOSED:
+            return "closed";
+        default:
+            return "???";
+    }
 }

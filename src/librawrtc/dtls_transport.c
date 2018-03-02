@@ -70,28 +70,6 @@ size_t const rawrtc_default_dtls_cipher_suites_length =
         ARRAY_SIZE(rawrtc_default_dtls_cipher_suites);
 
 /*
- * Get the corresponding name for an ICE transport state.
- */
-char const * const rawrtc_dtls_transport_state_to_name(
-        enum rawrtc_dtls_transport_state const state
-) {
-    switch (state) {
-        case RAWRTC_DTLS_TRANSPORT_STATE_NEW:
-            return "new";
-        case RAWRTC_DTLS_TRANSPORT_STATE_CONNECTING:
-            return "connecting";
-        case RAWRTC_DTLS_TRANSPORT_STATE_CONNECTED:
-            return "connected";
-        case RAWRTC_DTLS_TRANSPORT_STATE_CLOSED:
-            return "closed";
-        case RAWRTC_DTLS_TRANSPORT_STATE_FAILED:
-            return "failed";
-        default:
-            return "???";
-    }
-}
-
-/*
  * Handle outgoing buffered DTLS messages.
  */
 static bool dtls_outgoing_buffer_handler(
@@ -713,6 +691,7 @@ out:
 
 /*
  * Create a new DTLS transport.
+ * `*transport` must be unreferenced.
  */
 enum rawrtc_code rawrtc_dtls_transport_create(
         struct rawrtc_dtls_transport** const transportp, // de-referenced
@@ -1136,4 +1115,26 @@ enum rawrtc_code rawrtc_dtls_transport_get_local_parameters(
     // Create and return DTLS parameters instance
     return rawrtc_dtls_parameters_create_internal(
             parametersp, transport->role, &transport->fingerprints);
+}
+
+/*
+ * Get the corresponding name for an ICE transport state.
+ */
+char const * const rawrtc_dtls_transport_state_to_name(
+        enum rawrtc_dtls_transport_state const state
+) {
+    switch (state) {
+        case RAWRTC_DTLS_TRANSPORT_STATE_NEW:
+            return "new";
+        case RAWRTC_DTLS_TRANSPORT_STATE_CONNECTING:
+            return "connecting";
+        case RAWRTC_DTLS_TRANSPORT_STATE_CONNECTED:
+            return "connected";
+        case RAWRTC_DTLS_TRANSPORT_STATE_CLOSED:
+            return "closed";
+        case RAWRTC_DTLS_TRANSPORT_STATE_FAILED:
+            return "failed";
+        default:
+            return "???";
+    }
 }

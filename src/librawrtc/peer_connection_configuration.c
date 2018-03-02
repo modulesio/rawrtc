@@ -23,6 +23,7 @@ static void rawrtc_peer_connection_configuration_destroy(
 
 /*
  * Create a new peer connection configuration.
+ * `*configurationp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_create(
         struct rawrtc_peer_connection_configuration** const configurationp, // de-referenced
@@ -107,6 +108,7 @@ enum rawrtc_code rawrtc_peer_connection_configuration_add_ice_server(
 
 /*
  * Get ICE servers from the peer connection configuration.
+ * `*serversp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_get_ice_servers(
         struct rawrtc_ice_servers** const serversp, // de-referenced
@@ -154,6 +156,7 @@ enum rawrtc_code rawrtc_peer_connection_configuration_add_certificate(
 
 /*
  * Get certificates from the peer connection configuration.
+ * `*certificatesp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_configuration_get_certificates(
         struct rawrtc_certificates** const certificatesp, // de-referenced

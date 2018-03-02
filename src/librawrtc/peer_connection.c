@@ -734,6 +734,7 @@ static void rawrtc_peer_connection_destroy(
 
 /*
  * Create a new peer connection.
+ * `*connectionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create(
         struct rawrtc_peer_connection** const connectionp, // de-referenced
@@ -852,6 +853,7 @@ enum rawrtc_code rawrtc_peer_connection_close(
 
 /*
  * Create an offer.
+ * `*descriptionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create_offer(
         struct rawrtc_peer_connection_description** const descriptionp, // de-referenced
@@ -885,6 +887,7 @@ enum rawrtc_code rawrtc_peer_connection_create_offer(
 
 /*
  * Create an answer.
+ * `*descriptionp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create_answer(
         struct rawrtc_peer_connection_description** const descriptionp, // de-referenced
@@ -1442,6 +1445,7 @@ enum rawrtc_code rawrtc_peer_connection_can_trickle_ice_candidates(
 
 /*
  * Create a data channel on a peer connection.
+ * `*channelp` must be unreferenced.
  */
 enum rawrtc_code rawrtc_peer_connection_create_data_channel(
         struct rawrtc_data_channel** const channelp, // de-referenced
