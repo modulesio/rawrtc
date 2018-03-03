@@ -1,4 +1,5 @@
 #pragma once
+#include <rawrtc.h>
 
 enum {
     RAWRTC_ICE_GATHERER_DNS_SERVERS = 10

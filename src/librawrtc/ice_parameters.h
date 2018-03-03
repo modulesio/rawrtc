@@ -1,4 +1,5 @@
 #pragma once
+#include <rawrtc.h>
 
 int rawrtc_ice_parameters_debug(
     struct re_printf* const pf,

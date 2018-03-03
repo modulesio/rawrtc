@@ -2,7 +2,6 @@
 #include <netinet/in.h> // IPPROTO_UDP, IPPROTO_TCP
 #include <string.h> // memcpy
 #include <rawrtc.h>
-#include "utils.h"
 #include "ice_candidate.h"
 #include "message_buffer.h"
 #include "candidate_helper.h"
@@ -14,6 +13,22 @@
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
 #define RAWRTC_DEBUG_ICE_GATHERER 0 // TODO: Remove
 #include "debug.h"
+
+/*
+ * Get the corresponding address family name for an DNS type.
+ */
+static char const * const dns_type_to_address_family_name(
+        uint_fast16_t const dns_type
+) {
+    switch (dns_type) {
+        case DNS_TYPE_A:
+            return "IPv4";
+        case DNS_TYPE_AAAA:
+            return "IPv6";
+        default:
+            return "???";
+    }
+}
 
 /*
  * Destructor for an existing ICE gatherer.
@@ -888,8 +903,7 @@ static enum rawrtc_code query_a_or_aaaa_record(
 
     // Check if already resolved
     if (resolved) {
-        DEBUG_PRINTF("Hostname (%s) already resolved\n",
-                     rawrtc_dns_type_to_address_family_name(dns_type));
+        DEBUG_PRINTF("Hostname (%s) already resolved\n", dns_type_to_address_family_name(dns_type));
         return RAWRTC_CODE_SUCCESS;
     }
 

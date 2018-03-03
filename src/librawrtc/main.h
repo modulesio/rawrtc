@@ -1,9 +1,11 @@
 #pragma once
+#include <rawrtc.h>
 
 /*
  * Global rawrtc vars.
  */
 struct rawrtc_global {
+    // TODO: This all needs to go!
     pthread_mutex_t mutex;
     pthread_t mutex_main_thread;
     uint_fast16_t mutex_counter;

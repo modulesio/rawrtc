@@ -1,4 +1,5 @@
 #pragma once
+#include <rawrtc.h>
 
 // Note: Cannot be public until it uses fixed size types in signature (stdint)
 uint32_t rawrtc_ice_candidate_calculate_priority(
@@ -34,4 +35,22 @@ enum rawrtc_code rawrtc_ice_candidate_create_from_remote_candidate(
 int rawrtc_ice_candidate_debug(
     struct re_printf* const pf,
     struct rawrtc_ice_candidate* const candidate
+);
+
+enum ice_cand_type rawrtc_ice_candidate_type_to_ice_cand_type(
+    enum rawrtc_ice_candidate_type const type
+);
+
+enum rawrtc_code rawrtc_ice_cand_type_to_ice_candidate_type(
+    enum rawrtc_ice_candidate_type* const typep, // de-referenced
+    const enum ice_cand_type re_type
+);
+
+enum ice_tcptype rawrtc_ice_tcp_candidate_type_to_ice_tcptype(
+    const enum rawrtc_ice_tcp_candidate_type type
+);
+
+enum rawrtc_code rawrtc_ice_tcptype_to_ice_tcp_candidate_type(
+    enum rawrtc_ice_tcp_candidate_type* const typep, // de-referenced
+    const enum ice_tcptype re_type
 );

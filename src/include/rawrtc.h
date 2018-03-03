@@ -1,9 +1,9 @@
 #pragma once
-
-#include <stdlib.h> // TODO: Why?
 #include <stdbool.h> // bool
 #include <netinet/in.h> // IPPROTO_UDP, IPPROTO_TCP, ...
-#include <openssl/evp.h> // EVP_PKEY
+
+// TODO: Make this a build configuration
+#define RAWRTC_DEBUG_LEVEL 5
 
 #define HAVE_INTTYPES_H
 #include <re.h>
@@ -511,40 +511,6 @@ struct rawrtc_config {
 };
 
 /*
- * Message buffer.
- * TODO: private
- */
-struct rawrtc_buffered_message {
-    struct le le;
-    struct mbuf* buffer; // referenced
-    void* context; // referenced, nullable
-};
-
-/*
- * Certificate options.
- * TODO: private
- */
-struct rawrtc_certificate_options {
-    enum rawrtc_certificate_key_type key_type;
-    char* common_name; // copied
-    uint_fast32_t valid_until;
-    enum rawrtc_certificate_sign_algorithm sign_algorithm;
-    char* named_curve; // nullable, copied, ignored for RSA
-    uint_fast32_t modulus_length; // ignored for ECC
-};
-
-/*
- * Certificate.
- * TODO: private
- */
-struct rawrtc_certificate {
-    struct le le;
-    X509* certificate;
-    EVP_PKEY* key;
-    enum rawrtc_certificate_key_type key_type;
-};
-
-/*
  * ICE gather options.
  * TODO: private
  */
@@ -898,15 +864,6 @@ enum {
 
 
 /*
- * Array container.
- * TODO: private
- */
-struct rawrtc_array_container {
-    size_t n_items;
-    void* items[];
-};
-
-/*
  * Certificates.
  * Note: Inherits `struct rawrtc_array_container`.
  */
@@ -964,54 +921,6 @@ enum rawrtc_code rawrtc_init(
 enum rawrtc_code rawrtc_close(
     bool const close_re
 );
-
-/*
- * Create certificate options.
- *
- * All arguments but `key_type` are optional. Sane and safe default
- * values will be applied, don't worry!
- *
- * `*optionsp` must be unreferenced.
- *
- * If `common_name` is `NULL` the default common name will be applied.
- * If `valid_until` is `0` the default certificate lifetime will be
- * applied.
- * If the key type is `ECC` and `named_curve` is `NULL`, the default
- * named curve will be used.
- * If the key type is `RSA` and `modulus_length` is `0`, the default
- * amount of bits will be used. The same applies to the
- * `sign_algorithm` if it has been set to `NONE`.
- */
-enum rawrtc_code rawrtc_certificate_options_create(
-    struct rawrtc_certificate_options** const optionsp, // de-referenced
-    enum rawrtc_certificate_key_type const key_type,
-    char* common_name, // nullable, copied
-    uint_fast32_t valid_until,
-    enum rawrtc_certificate_sign_algorithm sign_algorithm,
-    char* named_curve, // nullable, copied, ignored for RSA
-    uint_fast32_t modulus_length // ignored for ECC
-);
-
-/*
- * Create and generate a self-signed certificate.
- *
- * Sane and safe default options will be applied if `options` is
- * `NULL`.
- *
- * `*certificatep` must be unreferenced.
- */
-enum rawrtc_code rawrtc_certificate_generate(
-    struct rawrtc_certificate** const certificatep,
-    struct rawrtc_certificate_options* options // nullable
-);
-
-/*
- * TODO http://draft.ortc.org/#dom-rtccertificate
- * rawrtc_certificate_from_bytes
- * rawrtc_certificate_get_expires
- * rawrtc_certificate_get_fingerprint
- * rawrtc_certificate_get_algorithm
- */
 
 /*
  * Create an ICE candidate.
@@ -1116,6 +1025,90 @@ enum rawrtc_code rawrtc_ice_candidate_get_related_port(
 );
 
 /*
+ * Translate a protocol to the corresponding IPPROTO_*.
+ */
+int rawrtc_ice_protocol_to_ipproto(
+    enum rawrtc_ice_protocol const protocol
+);
+
+/*
+ * Translate a IPPROTO_* to the corresponding protocol.
+ */
+enum rawrtc_code rawrtc_ipproto_to_ice_protocol(
+    enum rawrtc_ice_protocol* const protocolp, // de-referenced
+    int const ipproto
+);
+
+/*
+ * Translate an ICE protocol to str.
+ */
+char const * rawrtc_ice_protocol_to_str(
+    enum rawrtc_ice_protocol const protocol
+);
+
+/*
+ * Translate a pl to an ICE protocol (case-insensitive).
+ */
+enum rawrtc_code rawrtc_pl_to_ice_protocol(
+    enum rawrtc_ice_protocol* const protocolp, // de-referenced
+    struct pl const* const pl
+);
+
+/*
+ * Translate a str to an ICE protocol (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_ice_protocol(
+    enum rawrtc_ice_protocol* const protocolp, // de-referenced
+    char const* const str
+);
+
+/*
+ * Translate an ICE candidate type to str.
+ */
+char const * rawrtc_ice_candidate_type_to_str(
+    enum rawrtc_ice_candidate_type const type
+);
+
+/*
+ * Translate a pl to an ICE candidate type (case-insensitive).
+ */
+enum rawrtc_code rawrtc_pl_to_ice_candidate_type(
+    enum rawrtc_ice_candidate_type* const typep, // de-referenced
+    struct pl const* const pl
+);
+
+/*
+ * Translate a str to an ICE candidate type (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_ice_candidate_type(
+    enum rawrtc_ice_candidate_type* const typep, // de-referenced
+    char const* const str
+);
+
+/*
+ * Translate an ICE TCP candidate type to str.
+ */
+char const * rawrtc_ice_tcp_candidate_type_to_str(
+    enum rawrtc_ice_tcp_candidate_type const type
+);
+
+/*
+ * Translate a str to an ICE TCP candidate type (case-insensitive).
+ */
+enum rawrtc_code rawrtc_pl_to_ice_tcp_candidate_type(
+    enum rawrtc_ice_tcp_candidate_type* const typep, // de-referenced
+    struct pl const* const pl
+);
+
+/*
+ * Translate a str to an ICE TCP candidate type (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_ice_tcp_candidate_type(
+    enum rawrtc_ice_tcp_candidate_type* const typep, // de-referenced
+    char const* const str
+);
+
+/*
  * Create a new ICE parameters instance.
  * `*parametersp` must be unreferenced.
  */
@@ -1184,6 +1177,21 @@ enum rawrtc_code rawrtc_ice_gather_options_add_server(
  * rawrtc_ice_server_set_credential
  * rawrtc_ice_server_set_credential_type
  */
+
+/*
+ * Translate an ICE gather policy to str.
+ */
+char const * rawrtc_ice_gather_policy_to_str(
+    enum rawrtc_ice_gather_policy const policy
+);
+
+/*
+ * Translate a str to an ICE gather policy (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_ice_gather_policy(
+    enum rawrtc_ice_gather_policy* const policyp, // de-referenced
+    char const* const str
+);
 
 /*
  * Create a new ICE gatherer.
@@ -1354,6 +1362,21 @@ char const * const rawrtc_ice_transport_state_to_name(
 );
 
 /*
+ * Translate an ICE role to str.
+ */
+char const * rawrtc_ice_role_to_str(
+    enum rawrtc_ice_role const role
+);
+
+/*
+ * Translate a str to an ICE role (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_ice_role(
+    enum rawrtc_ice_role* const rolep, // de-referenced
+    char const* const str
+);
+
+/*
  * Create a new DTLS fingerprint instance.
  * `*fingerprintp` must be unreferenced.
  */
@@ -1480,6 +1503,21 @@ enum rawrtc_code rawrtc_dtls_transport_get_local_parameters(
 */
 char const * const rawrtc_dtls_transport_state_to_name(
     enum rawrtc_dtls_transport_state const state
+);
+
+/*
+ * Translate a DTLS role to str.
+ */
+char const * rawrtc_dtls_role_to_str(
+    enum rawrtc_dtls_role const role
+);
+
+/*
+ * Translate a str to a DTLS role (case-insensitive).
+ */
+enum rawrtc_code rawrtc_str_to_dtls_role(
+    enum rawrtc_dtls_role* const rolep, // de-referenced
+    char const* const str
 );
 
 /*
@@ -1926,6 +1964,21 @@ enum rawrtc_code rawrtc_peer_connection_description_get_sdp(
 );
 
 /*
+ * Translate an SDP type to str.
+ */
+char const * rawrtc_sdp_type_to_str(
+    enum rawrtc_sdp_type const type
+);
+
+/*
+ * Translate a str to an SDP type.
+ */
+enum rawrtc_code rawrtc_str_to_sdp_type(
+    enum rawrtc_sdp_type* const typep, // de-referenced
+    char const* const str
+);
+
+/*
  * Create a new ICE candidate from SDP.
  * `*candidatesp` must be unreferenced.
  *
@@ -2295,187 +2348,4 @@ enum rawrtc_code rawrtc_peer_connection_set_data_channel_handler(
 enum rawrtc_code rawrtc_peer_connection_get_data_channel_handler(
     rawrtc_data_channel_handler** const data_channel_handlerp, // de-referenced
     struct rawrtc_peer_connection* const connection
-);
-
-
-
-/*
- * Translate a rawrtc return code to a string.
- */
-char const* rawrtc_code_to_str(
-    enum rawrtc_code const code
-);
-
-/*
- * Translate an re error to a rawrtc code.
- */
-enum rawrtc_code rawrtc_error_to_code(
-    const int code
-);
-
-/*
- * Translate an ICE gather policy to str.
- */
-char const * rawrtc_ice_gather_policy_to_str(
-    enum rawrtc_ice_gather_policy const policy
-);
-
-/*
- * Translate a str to an ICE gather policy (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_ice_gather_policy(
-    enum rawrtc_ice_gather_policy* const policyp, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate a protocol to the corresponding IPPROTO_*.
- */
-int rawrtc_ice_protocol_to_ipproto(
-    enum rawrtc_ice_protocol const protocol
-);
-
-/*
- * Translate a IPPROTO_* to the corresponding protocol.
- */
-enum rawrtc_code rawrtc_ipproto_to_ice_protocol(
-    enum rawrtc_ice_protocol* const protocolp, // de-referenced
-    int const ipproto
-);
-
-/*
- * Translate an ICE protocol to str.
- */
-char const * rawrtc_ice_protocol_to_str(
-    enum rawrtc_ice_protocol const protocol
-);
-
-/*
- * Translate a str to an ICE protocol (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_ice_protocol(
-    enum rawrtc_ice_protocol* const protocolp, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate an ICE candidate type to str.
- */
-char const * rawrtc_ice_candidate_type_to_str(
-    enum rawrtc_ice_candidate_type const type
-);
-
-/*
- * Translate a str to an ICE candidate type (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_ice_candidate_type(
-    enum rawrtc_ice_candidate_type* const typep, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate an ICE TCP candidate type to str.
- */
-char const * rawrtc_ice_tcp_candidate_type_to_str(
-    enum rawrtc_ice_tcp_candidate_type const type
-);
-
-/*
- * Translate a str to an ICE TCP candidate type (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_ice_tcp_candidate_type(
-    enum rawrtc_ice_tcp_candidate_type* const typep, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate an ICE role to str.
- */
-char const * rawrtc_ice_role_to_str(
-    enum rawrtc_ice_role const role
-);
-
-/*
- * Translate a str to an ICE role (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_ice_role(
-    enum rawrtc_ice_role* const rolep, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate a DTLS role to str.
- */
-char const * rawrtc_dtls_role_to_str(
-    enum rawrtc_dtls_role const role
-);
-
-/*
- * Translate a str to a DTLS role (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_dtls_role(
-    enum rawrtc_dtls_role* const rolep, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate a certificate sign algorithm to str.
- */
-char const * rawrtc_certificate_sign_algorithm_to_str(
-    enum rawrtc_certificate_sign_algorithm const algorithm
-);
-
-/*
- * Translate a str to a certificate sign algorithm (case-insensitive).
- */
-enum rawrtc_code rawrtc_str_to_certificate_sign_algorithm(
-    enum rawrtc_certificate_sign_algorithm* const algorithmp, // de-referenced
-    char const* const str
-);
-
-/*
- * Translate an SDP type to str.
- */
-char const * rawrtc_sdp_type_to_str(
-    enum rawrtc_sdp_type const type
-);
-
-/*
- * Translate a str to an SDP type.
- */
-enum rawrtc_code rawrtc_str_to_sdp_type(
-    enum rawrtc_sdp_type* const typep, // de-referenced
-    char const* const str
-);
-
-
-
-/*
- * Duplicate a string.
- * `*destinationp` will be set to a copy of `source` and must be
- * unreferenced.
- */
-enum rawrtc_code rawrtc_strdup(
-    char** const destinationp,
-    char const * const source
-);
-
-/*
- * Print a formatted string to a buffer.
- */
-enum rawrtc_code rawrtc_snprintf(
-    char* const destinationp,
-    size_t const size,
-    char* const formatter,
-    ...
-);
-
-/*
- * Print a formatted string to a dynamically allocated buffer.
- * `*destinationp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_sdprintf(
-    char** const destinationp,
-    char* const formatter,
-    ...
 );

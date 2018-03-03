@@ -1,6 +1,7 @@
 # Library sources
 set(rawrtc_SOURCES
         candidate_helper.c
+        config.c
         REMOVEdata_channel.c
         REMOVEdata_channel_options.c
         REMOVEdata_channel_parameters.c
@@ -26,6 +27,7 @@ set(rawrtc_SOURCES
 # Library internal headers
 set(rawrtc_HEADERS
         candidate_helper.h
+        config.h
         REMOVEdata_channel_options.h
         REMOVEdata_channel_parameters.h
         REMOVEdata_transport.h

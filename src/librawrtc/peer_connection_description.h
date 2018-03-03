@@ -1,4 +1,5 @@
 #pragma once
+#include <rawrtc.h>
 
 #define RAWRTC_PEER_CONNECTION_DESCRIPTION_MID "rawrtc-sctp-dc"
 
