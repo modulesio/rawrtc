@@ -1,10 +1,12 @@
 #include <rawrtc.h>
-#include "ice_transport.h"
+#include "config.h"
+#include "ice_candidate.h"
 #include "dtls_transport.h"
+#include "ice_transport.h"
 
 #define DEBUG_MODULE "ice-transport"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 /*
  * Destructor for an existing ICE transport.

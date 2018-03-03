@@ -1,10 +1,11 @@
 #include <string.h> // strlen
 #include <rawrtc.h>
+#include "config.h"
 #include "ice_server.h"
 
 #define DEBUG_MODULE "ice-server"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 /*
  * ICE server URL-related regular expressions.

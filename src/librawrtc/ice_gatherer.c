@@ -1,9 +1,10 @@
 #include <sys/socket.h> // AF_INET, AF_INET6
 #include <netinet/in.h> // IPPROTO_UDP, IPPROTO_TCP
 #include <string.h> // memcpy
+#include <rawrtcc/internal/message_buffer.h>
 #include <rawrtc.h>
+#include "config.h"
 #include "ice_candidate.h"
-#include "message_buffer.h"
 #include "candidate_helper.h"
 #include "ice_server.h"
 #include "ice_gather_options.h"
@@ -12,7 +13,7 @@
 #define DEBUG_MODULE "ice-gatherer"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
 #define RAWRTC_DEBUG_ICE_GATHERER 0 // TODO: Remove
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 /*
  * Get the corresponding address family name for an DNS type.

@@ -10,6 +10,7 @@
 #include <rew.h>
 #include <usrsctp.h>
 #include <rawrtcc.h>
+#include <rawrtcdc.h>
 
 /*
  * Version
@@ -112,47 +113,6 @@ enum rawrtc_dtls_transport_state {
 };
 
 /*
- * Data channel is unordered bit flag.
- */
-enum {
-    RAWRTC_DATA_CHANNEL_TYPE_IS_UNORDERED = 0x80
-};
-
-/*
- * Data channel types.
- */
-enum rawrtc_data_channel_type {
-    RAWRTC_DATA_CHANNEL_TYPE_RELIABLE_ORDERED = 0x00,
-    RAWRTC_DATA_CHANNEL_TYPE_RELIABLE_UNORDERED = 0x80,
-    RAWRTC_DATA_CHANNEL_TYPE_UNRELIABLE_ORDERED_RETRANSMIT = 0x01,
-    RAWRTC_DATA_CHANNEL_TYPE_UNRELIABLE_UNORDERED_RETRANSMIT = 0x81,
-    RAWRTC_DATA_CHANNEL_TYPE_UNRELIABLE_ORDERED_TIMED = 0x02,
-    RAWRTC_DATA_CHANNEL_TYPE_UNRELIABLE_UNORDERED_TIMED = 0x82
-}; // IMPORTANT: If you add a new type, ensure that every data channel transport handles it
-   //            correctly! Also, ensure this still works with the unordered bit flag above or
-   //            update the implementations.
-
-/*
- * Data channel message flags.
- */
-enum rawrtc_data_channel_message_flag {
-    RAWRTC_DATA_CHANNEL_MESSAGE_FLAG_NONE = 1 << 0,
-    RAWRTC_DATA_CHANNEL_MESSAGE_FLAG_IS_ABORTED = 1 << 1,
-    RAWRTC_DATA_CHANNEL_MESSAGE_FLAG_IS_COMPLETE = 1 << 2,
-    RAWRTC_DATA_CHANNEL_MESSAGE_FLAG_IS_BINARY = 1 << 3,
-};
-
-/*
- * SCTP transport state.
- */
-enum rawrtc_sctp_transport_state {
-    RAWRTC_SCTP_TRANSPORT_STATE_NEW,
-    RAWRTC_SCTP_TRANSPORT_STATE_CONNECTING,
-    RAWRTC_SCTP_TRANSPORT_STATE_CONNECTED,
-    RAWRTC_SCTP_TRANSPORT_STATE_CLOSED
-};
-
-/*
  * ICE protocol.
  */
 enum rawrtc_ice_protocol {
@@ -180,16 +140,6 @@ enum rawrtc_ice_tcp_candidate_type {
 };
 
 /*
- * Data channel state.
- */
-enum rawrtc_data_channel_state {
-    RAWRTC_DATA_CHANNEL_STATE_CONNECTING,
-    RAWRTC_DATA_CHANNEL_STATE_OPEN,
-    RAWRTC_DATA_CHANNEL_STATE_CLOSING,
-    RAWRTC_DATA_CHANNEL_STATE_CLOSED
-};
-
-/*
  * Signalling state.
  */
 enum rawrtc_signaling_state {
@@ -214,47 +164,7 @@ enum rawrtc_peer_connection_state {
 };
 
 /*
- * Data transport type.
- * TODO: private -> data_transport.h
- */
-enum rawrtc_data_transport_type {
-    RAWRTC_DATA_TRANSPORT_TYPE_SCTP
-};
-
-/*
- * ICE candidate storage type (internal).
- * TODO: Private
- */
-enum rawrtc_ice_candidate_storage {
-    RAWRTC_ICE_CANDIDATE_STORAGE_RAW,
-    RAWRTC_ICE_CANDIDATE_STORAGE_LCAND,
-    RAWRTC_ICE_CANDIDATE_STORAGE_RCAND,
-};
-
-/*
- * ICE server type.
- * Note: Update `ice_server_schemes` if changed.
- * TODO: private -> ice_gatherer.h
- */
-enum rawrtc_ice_server_type {
-    RAWRTC_ICE_SERVER_TYPE_STUN,
-    RAWRTC_ICE_SERVER_TYPE_TURN
-};
-
-/*
- * ICE server transport protocol.
- * TODO: private -> ice_gatherer.h
- */
-enum rawrtc_ice_server_transport {
-    RAWRTC_ICE_SERVER_TRANSPORT_UDP,
-    RAWRTC_ICE_SERVER_TRANSPORT_TCP,
-    RAWRTC_ICE_SERVER_TRANSPORT_DTLS,
-    RAWRTC_ICE_SERVER_TRANSPORT_TLS
-};
-
-/*
  * Length of various arrays.
- * TODO: private
  */
 enum {
     ICE_USERNAME_FRAGMENT_LENGTH = 16,
@@ -263,20 +173,87 @@ enum {
 };
 
 
+
 /*
- * Struct prototypes.
- * TODO: Remove
+ * Configuration.
  */
-struct rawrtc_ice_server_url_context;
+struct rawrtc_config;
+
+/*
+ * ICE gather options.
+ */
+struct rawrtc_ice_gather_options;
+
+/*
+ * ICE server.
+ */
+struct rawrtc_ice_server;
+
+/*
+ * ICE candidate.
+ */
 struct rawrtc_ice_candidate;
-struct rawrtc_data_channel;
-struct rawrtc_dtls_transport;
+
+/*
+ * ICE parameters.
+ */
+struct rawrtc_ice_parameters;
+
+/*
+ * ICE gatherer.
+ */
+struct rawrtc_ice_gatherer;
+
+/*
+ * ICE transport.
+ */
+struct rawrtc_ice_transport;
+
+/*
+ * DTLS fingerprint.
+ */
+struct rawrtc_dtls_fingerprint;
+
+/*
+ * DTLS parameters.
+ */
 struct rawrtc_dtls_parameters;
-struct rawrtc_data_channel_parameters;
-struct rawrtc_data_transport;
-struct rawrtc_sctp_transport;
-struct rawrtc_sctp_capabilities;
+
+/*
+ * DTLS transport.
+ */
+struct rawrtc_dtls_transport;
+
+/*
+ * Peer connection configuration.
+ */
+struct rawrtc_peer_connection_configuration;
+
+/*
+ * Peer connection ICE candidate.
+ */
 struct rawrtc_peer_connection_ice_candidate;
+
+/*
+ * Peer connection description.
+ */
+struct rawrtc_peer_connection_description;
+
+/*
+ * Peer connection.
+ */
+struct rawrtc_peer_connection;
+
+/*
+ * Layers.
+ */
+enum {
+    RAWRTC_LAYER_SCTP = 20,
+    RAWRTC_LAYER_DTLS_SRTP_STUN = 10, // TODO: Pretty sure we are able to detect STUN earlier
+    RAWRTC_LAYER_ICE = 0,
+    RAWRTC_LAYER_STUN = -10,
+    RAWRTC_LAYER_TURN = -10
+};
 
 
 
@@ -344,70 +321,6 @@ typedef void (rawrtc_dtls_transport_error_handler)(
 );
 
 /*
- * SCTP transport state change handler.
- */
-typedef void (rawrtc_sctp_transport_state_change_handler)(
-    enum rawrtc_sctp_transport_state const state,
-    void* const arg
-);
-
-/*
- * Data channel open handler.
- */
-typedef void (rawrtc_data_channel_open_handler)(
-    void* const arg
-);
-
-/*
- * Data channel buffered amount low handler.
- */
-typedef void (rawrtc_data_channel_buffered_amount_low_handler)(
-    void* const arg
-);
-
-/*
- * Data channel error handler.
- */
-typedef void (rawrtc_data_channel_error_handler)(
-    /* TODO */
-    void* const arg
-);
-
-/*
- * Data channel close handler.
- */
-typedef void (rawrtc_data_channel_close_handler)(
-    void* const arg
-);
-
-/*
- * Data channel message handler.
- *
- * Note: `buffer` may be NULL in case partial delivery has been
- *       requested and a message has been aborted (this can only happen
- *       on partially reliable channels).
- *
- * TODO: ORTC is really unclear about that handler. Consider improving it with a PR.
- */
-typedef void (rawrtc_data_channel_message_handler)(
-    struct mbuf* const buffer, // nullable (in case partial delivery has been requested)
-    enum rawrtc_data_channel_message_flag const flags,
-    void* const arg
-);
-
-/*
- * Data channel handler.
- *
- * You should call `rawrtc_data_channel_set_options` in this handler
- * before doing anything else if you want to change behaviour of the
- * data channel.
- */
-typedef void (rawrtc_data_channel_handler)(
-    struct rawrtc_data_channel* const data_channel, // read-only, MUST be referenced when used
-    void* const arg
-);
-
-/*
  * Peer connection state change handler.
  */
 typedef void (rawrtc_peer_connection_state_change_handler)(
@@ -453,413 +366,6 @@ typedef void (rawrtc_signaling_state_change_handler)(
     enum rawrtc_signaling_state const state, // read-only
     void* const arg
 );
-
-/*
- * Handle incoming data messages.
- * TODO: private -> dtls_transport.h
- */
-typedef void (rawrtc_dtls_transport_receive_handler)(
-    struct mbuf* const buffer,
-    void* const arg
-);
-
-/*
- * Create the data channel (transport handler).
- * TODO: private -> data_transport.h
- */
-typedef enum rawrtc_code (rawrtc_data_transport_channel_create_handler)(
-    struct rawrtc_data_transport* const transport,
-    struct rawrtc_data_channel* const channel, // referenced
-    struct rawrtc_data_channel_parameters const * const parameters // read-only
-);
-
-/*
- * Close the data channel (transport handler).
- * TODO: private -> data_transport.h
- */
-typedef enum rawrtc_code (rawrtc_data_transport_channel_close_handler)(
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Send data via the data channel (transport handler).
- * TODO: private -> data_transport.h
- */
-typedef enum rawrtc_code (rawrtc_data_transport_channel_send_handler)(
-    struct rawrtc_data_channel* const channel,
-    struct mbuf* buffer, // nullable (if size 0), referenced
-    bool const is_binary
-);
-
-
-
-/*
- * Configuration.
- * TODO: Add to a constructor... somewhere
- */
-struct rawrtc_config {
-    uint32_t pacing_interval;
-    bool ipv4_enable;
-    bool ipv6_enable;
-    bool udp_enable;
-    bool tcp_enable;
-    enum rawrtc_certificate_sign_algorithm sign_algorithm;
-    enum rawrtc_ice_server_transport ice_server_normal_transport;
-    enum rawrtc_ice_server_transport ice_server_secure_transport;
-    uint32_t stun_keepalive_interval;
-    struct stun_conf stun_config;
-};
-
-/*
- * ICE gather options.
- * TODO: private
- */
-struct rawrtc_ice_gather_options {
-    enum rawrtc_ice_gather_policy gather_policy;
-    struct list ice_servers;
-};
-
-/*
- * ICE server.
- * TODO: private
- */
-struct rawrtc_ice_server {
-    struct le le;
-    struct list urls; // deep-copied
-    char* username; // copied
-    char* credential; // copied
-    enum rawrtc_ice_credential_type credential_type;
-};
-
-/*
- * ICE server URL. (list element)
- * TODO: private
- */
-struct rawrtc_ice_server_url {
-    struct le le;
-    char* url; // copied
-    struct pl host; // points inside `url`
-    enum rawrtc_ice_server_type type;
-    enum rawrtc_ice_server_transport transport;
-    struct sa ipv4_address;
-    struct rawrtc_ice_server_url_dns_context* dns_a_context;
-    struct sa ipv6_address;
-    struct rawrtc_ice_server_url_dns_context* dns_aaaa_context;
-};
-
-/*
- * ICE server URL DNS resolve context.
- * TODO: private -> ice_gatherer.h
- */
-struct rawrtc_ice_server_url_dns_context {
-    uint_fast16_t dns_type;
-    struct rawrtc_ice_server_url* url;
-    struct rawrtc_ice_gatherer* gatherer;
-    struct dns_query* dns_query;
-};
-
-/*
- * Raw ICE candidate (pending candidate).
- * TODO: private
- */
-struct rawrtc_ice_candidate_raw {
-    char* foundation; // copied
-    uint32_t priority;
-    char* ip; // copied
-    enum rawrtc_ice_protocol protocol;
-    uint16_t port;
-    enum rawrtc_ice_candidate_type type;
-    enum rawrtc_ice_tcp_candidate_type tcp_type;
-    char* related_address; // copied, nullable
-    uint16_t related_port;
-};
-
-/*
- * ICE candidate.
- * TODO: private
- */
-struct rawrtc_ice_candidate {
-    enum rawrtc_ice_candidate_storage storage_type;
-    union {
-        struct rawrtc_ice_candidate_raw* raw_candidate;
-        struct ice_lcand* local_candidate;
-        struct ice_rcand* remote_candidate;
-    } candidate;
-};
-
-/*
- * ICE parameters.
- * TODO: private
- */
-struct rawrtc_ice_parameters {
-    char* username_fragment; // copied
-    char* password; // copied
-    bool ice_lite;
-};
-
-/*
- * ICE gatherer.
- * TODO: private
- */
-struct rawrtc_ice_gatherer {
-    enum rawrtc_ice_gatherer_state state;
-    struct rawrtc_ice_gather_options* options; // referenced
-    rawrtc_ice_gatherer_state_change_handler* state_change_handler; // nullable
-    rawrtc_ice_gatherer_error_handler* error_handler; // nullable
-    rawrtc_ice_gatherer_local_candidate_handler* local_candidate_handler; // nullable
-    void* arg; // nullable
-    struct list buffered_messages; // TODO: Can this be added to the candidates list?
-    struct list local_candidates; // TODO: Hash list instead?
-    char ice_username_fragment[ICE_USERNAME_FRAGMENT_LENGTH + 1];
-    char ice_password[ICE_PASSWORD_LENGTH + 1];
-    struct trice* ice;
-    struct trice_conf ice_config;
-    struct dnsc* dns_client;
-};
-
-/*
- * ICE transport.
- * TODO: private
- */
-struct rawrtc_ice_transport {
-    enum rawrtc_ice_transport_state state;
-    struct rawrtc_ice_gatherer* gatherer; // referenced
-    rawrtc_ice_transport_state_change_handler* state_change_handler; // nullable
-    rawrtc_ice_transport_candidate_pair_change_handler* candidate_pair_change_handler; // nullable
-    void* arg; // nullable
-    struct rawrtc_ice_parameters* remote_parameters; // referenced
-    struct rawrtc_dtls_transport* dtls_transport; // referenced, nullable
-};
-
-/*
- * DTLS fingerprint.
- * TODO: private
- */
-struct rawrtc_dtls_fingerprint {
-    struct le le;
-    enum rawrtc_certificate_sign_algorithm algorithm;
-    char* value; // copied
-};
-
-/*
- * DTLS parameters.
- * TODO: private
- */
-struct rawrtc_dtls_parameters {
-    enum rawrtc_dtls_role role;
-    struct rawrtc_dtls_fingerprints* fingerprints;
-};
-
-/*
- * DTLS transport.
- * TODO: private
- */
-struct rawrtc_dtls_transport {
-    enum rawrtc_dtls_transport_state state;
-    struct rawrtc_ice_transport* ice_transport; // referenced
-    struct list certificates; // deep-copied
-    rawrtc_dtls_transport_state_change_handler* state_change_handler; // nullable
-    rawrtc_dtls_transport_error_handler* error_handler; // nullable
-    void* arg; // nullable
-    struct rawrtc_dtls_parameters* remote_parameters; // referenced
-    enum rawrtc_dtls_role role;
-    bool connection_established;
-    struct list buffered_messages_in;
-    struct list buffered_messages_out;
-    struct list fingerprints;
-    struct tls* context;
-    struct dtls_sock* socket;
-    struct tls_conn* connection;
-    rawrtc_dtls_transport_receive_handler* receive_handler;
-    void* receive_handler_arg;
-};
-
-/*
- * Generic data transport.
- * TODO: private
- */
-struct rawrtc_data_transport {
-    enum rawrtc_data_transport_type type; // TODO: Can this be removed?
-    void* transport;
-    rawrtc_data_transport_channel_create_handler* channel_create;
-    rawrtc_data_transport_channel_close_handler* channel_close;
-    rawrtc_data_transport_channel_send_handler* channel_send;
-};
-
-/*
- * Data channel parameters.
- * TODO: private
- */
-struct rawrtc_data_channel_parameters {
-    char* label; // copied
-    enum rawrtc_data_channel_type channel_type;
-    uint32_t reliability_parameter; // contains either max_packet_lifetime or max_retransmit
-    char* protocol; // copied
-    bool negotiated;
-    uint16_t id;
-};
-
-/*
- * Data channel options.
- * TODO: private
- */
-struct rawrtc_data_channel_options {
-    bool deliver_partially;
-};
-
-/*
- * SCTP capabilities.
- * TODO: private
- */
-struct rawrtc_sctp_capabilities {
-    uint64_t max_message_size;
-};
-
-/*
- * SCTP transport.
- * TODO: private
- */
-struct rawrtc_sctp_transport {
-    enum rawrtc_sctp_transport_state state;
-    uint16_t port;
-    uint64_t remote_maximum_message_size;
-    struct rawrtc_dtls_transport* dtls_transport; // referenced
-    rawrtc_data_channel_handler* data_channel_handler; // nullable
-    rawrtc_sctp_transport_state_change_handler* state_change_handler; // nullable
-    void* arg; // nullable
-    struct list buffered_messages_outgoing;
-    struct mbuf* buffer_dcep_inbound;
-    struct sctp_rcvinfo info_dcep_inbound;
-    struct rawrtc_data_channel** channels;
-    uint_fast16_t n_channels;
-    uint_fast16_t current_channel_sid;
-    FILE* trace_handle;
-    struct socket* socket;
-    uint_fast8_t flags;
-};
-
-/*
- * SCTP data channel context.
- * TODO: private
- */
-struct rawrtc_sctp_data_channel_context {
-    uint16_t sid;
-    uint_fast8_t flags;
-    struct mbuf* buffer_inbound;
-    struct sctp_rcvinfo info_inbound;
-};
-
-/*
- * Data channel.
- * TODO: private
- */
-struct rawrtc_data_channel {
-    uint_fast8_t flags;
-    enum rawrtc_data_channel_state state;
-    struct rawrtc_data_transport* transport; // referenced
-    void* transport_arg; // referenced
-    struct rawrtc_data_channel_parameters* parameters; // referenced
-    struct rawrtc_data_channel_options* options; // nullable, referenced
-    rawrtc_data_channel_open_handler* open_handler; // nullable
-    rawrtc_data_channel_buffered_amount_low_handler* buffered_amount_low_handler; // nullable
-    rawrtc_data_channel_error_handler* error_handler; // nullable
-    rawrtc_data_channel_close_handler* close_handler; // nullable
-    rawrtc_data_channel_message_handler* message_handler; // nullable
-    void* arg; // nullable
-};
-
-/*
- * Peer connection configuration.
- */
-struct rawrtc_peer_connection_configuration {
-    enum rawrtc_ice_gather_policy gather_policy;
-    struct list ice_servers;
-    struct list certificates;
-    bool sctp_sdp_05;
-};
-
-/*
- * Peer connection ICE candidate.
- * TODO: private
- */
-struct rawrtc_peer_connection_ice_candidate {
-    struct le le;
-    struct rawrtc_ice_candidate* candidate;
-    char* mid;
-    int16_t media_line_index;
-    char* username_fragment;
-};
-
-/*
- * Peer connection description.
- * TODO: private
- */
-struct rawrtc_peer_connection_description {
-    struct rawrtc_peer_connection* connection;
-    enum rawrtc_sdp_type type;
-    bool trickle_ice;
-    char* bundled_mids;
-    char* remote_media_line;
-    uint8_t media_line_index;
-    char* mid;
-    bool sctp_sdp_05;
-    bool end_of_candidates;
-    struct list ice_candidates;
-    struct rawrtc_ice_parameters* ice_parameters;
-    struct rawrtc_dtls_parameters* dtls_parameters;
-    struct rawrtc_sctp_capabilities* sctp_capabilities;
-    uint16_t sctp_port;
-    struct mbuf* sdp;
-};
-
-/*
- * Peer connection context.
- * TODO: private
- */
-struct rawrtc_peer_connection_context {
-    struct rawrtc_ice_gather_options* gather_options;
-    struct rawrtc_ice_gatherer* ice_gatherer;
-    struct rawrtc_ice_transport* ice_transport;
-    struct list certificates;
-    char dtls_id[DTLS_ID_LENGTH + 1];
-    struct rawrtc_dtls_transport* dtls_transport;
-    struct rawrtc_data_transport* data_transport;
-};
-
-/*
- * Peer connection.
- * TODO: private
- */
-struct rawrtc_peer_connection {
-    enum rawrtc_peer_connection_state connection_state;
-    enum rawrtc_signaling_state signaling_state;
-    struct rawrtc_peer_connection_configuration* configuration; // referenced
-    rawrtc_negotiation_needed_handler* negotiation_needed_handler; // nullable
-    rawrtc_peer_connection_local_candidate_handler* local_candidate_handler; // nullable
-    rawrtc_peer_connection_local_candidate_error_handler* local_candidate_error_handler; // nullable
-    rawrtc_signaling_state_change_handler* signaling_state_change_handler; // nullable
-    rawrtc_ice_transport_state_change_handler* ice_connection_state_change_handler; // nullable
-    rawrtc_ice_gatherer_state_change_handler* ice_gathering_state_change_handler; // nullable
-    rawrtc_peer_connection_state_change_handler* connection_state_change_handler; // nullable
-    rawrtc_data_channel_handler* data_channel_handler; // nullable
-    enum rawrtc_data_transport_type data_transport_type;
-    struct rawrtc_peer_connection_description* local_description; // referenced
-    struct rawrtc_peer_connection_description* remote_description; // referenced
-    struct rawrtc_peer_connection_context context;
-    void* arg; // nullable
-};
-
-/*
- * Layers.
- * TODO: private
- */
-enum {
-    RAWRTC_LAYER_SCTP = 20,
-    RAWRTC_LAYER_DTLS_SRTP_STUN = 10, // TODO: Pretty sure we are able to detect STUN earlier
-    RAWRTC_LAYER_ICE = 0,
-    RAWRTC_LAYER_STUN = -10,
-    RAWRTC_LAYER_TURN = -10
-};
 
 
 
@@ -1518,351 +1024,6 @@ char const * rawrtc_dtls_role_to_str(
 enum rawrtc_code rawrtc_str_to_dtls_role(
     enum rawrtc_dtls_role* const rolep, // de-referenced
     char const* const str
-);
-
-/*
- * Create a new SCTP transport capabilities instance.
- * `*capabilitiesp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_sctp_capabilities_create(
-    struct rawrtc_sctp_capabilities** const capabilitiesp, // de-referenced
-    uint64_t const max_message_size
-);
-
-/*
- * Get the SCTP parameter's maximum message size value.
- */
-enum rawrtc_code rawrtc_sctp_capabilities_get_max_message_size(
-    uint64_t* const max_message_sizep, // de-referenced
-    struct rawrtc_sctp_capabilities* const capabilities
-);
-
-/*
- * Create an SCTP transport.
- * `*transportp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_sctp_transport_create(
-    struct rawrtc_sctp_transport** const transportp, // de-referenced
-    struct rawrtc_dtls_transport* const dtls_transport, // referenced
-    uint16_t port, // zeroable
-    rawrtc_data_channel_handler* const data_channel_handler, // nullable
-    rawrtc_sctp_transport_state_change_handler* const state_change_handler, // nullable
-    void* const arg // nullable
-);
-
-/*
- * Get the SCTP data transport instance.
- * `*transportp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_sctp_transport_get_data_transport(
-    struct rawrtc_data_transport** const transportp, // de-referenced
-    struct rawrtc_sctp_transport* const sctp_transport // referenced
-);
-
-/*
- * Start the SCTP transport.
- */
-enum rawrtc_code rawrtc_sctp_transport_start(
-    struct rawrtc_sctp_transport* const transport,
-    struct rawrtc_sctp_capabilities const * const remote_capabilities, // copied
-    uint16_t remote_port // zeroable
-);
-
-/*
- * Stop and close the SCTP transport.
- */
-enum rawrtc_code rawrtc_sctp_transport_stop(
-    struct rawrtc_sctp_transport* const transport
-);
-
-/*
- * TODO (from RTCSctpTransport interface)
- * rawrtc_sctp_transport_get_transport
- * rawrtc_sctp_transport_get_state
- */
-
-/*
- * Get the local port of the SCTP transport.
- */
-enum rawrtc_code rawrtc_sctp_transport_get_port(
-    uint16_t* const portp, // de-referenced
-    struct rawrtc_sctp_transport* const transport
-);
-
-/*
- * Get the corresponding name for an SCTP transport state.
- */
-char const * const rawrtc_sctp_transport_state_to_name(
-    enum rawrtc_sctp_transport_state const state
-);
-
-/*
- * Get the local SCTP transport capabilities (static).
- * `*capabilitiesp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_sctp_transport_get_capabilities(
-    struct rawrtc_sctp_capabilities** const capabilitiesp // de-referenced
-);
-
-/*
- * TODO (from RTCSctpTransport interface)
- * rawrtc_sctp_transport_set_data_channel_handler
- */
-
-/*
- * Create data channel parameters.
- *
- * For `RAWRTC_DATA_CHANNEL_TYPE_RELIABLE_*`, the reliability parameter
- * is being ignored.
- *
- * When using `RAWRTC_DATA_CHANNEL_TYPE_*_RETRANSMIT`, the reliability
- * parameter specifies the number of times a retransmission occurs if
- * not acknowledged before the message is being discarded.
- *
- * When using `RAWRTC_DATA_CHANNEL_TYPE_*_TIMED`, the reliability
- * parameter specifies the time window in milliseconds during which
- * (re-)transmissions may occur before the message is being discarded.
- *
- * `*parametersp` must be unreferenced.
- *
- * In case `negotiated` is set to `false`, the `id` is being ignored.
- */
-enum rawrtc_code rawrtc_data_channel_parameters_create(
-    struct rawrtc_data_channel_parameters** const parametersp, // de-referenced
-    char const * const label, // copied, nullable
-    enum rawrtc_data_channel_type const channel_type,
-    uint32_t const reliability_parameter,
-    char const * const protocol, // copied
-    bool const negotiated,
-    uint16_t const id
-);
-
-/*
- * Get the label from the data channel parameters.
- * `*labelp` will be set to a copy of the parameter's label and must be
- * unreferenced.
- *
- * Return `RAWRTC_CODE_NO_VALUE` in case no label has been set.
- * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*parameters*
- * must be unreferenced.
- */
-enum rawrtc_code rawrtc_data_channel_parameters_get_label(
-    char** const labelp, // de-referenced
-    struct rawrtc_data_channel_parameters* const parameters
-);
-
-/*
- * TODO
- * rawrtc_data_channel_parameters_get_channel_type
- * rawrtc_data_channel_parameters_get_reliability_parameter
- */
-
-/*
- * Get the protocol from the data channel parameters.
- * `*protocolp` will be set to a copy of the parameter's protocol and
- * must be unreferenced.
- *
- * Return `RAWRTC_CODE_NO_VALUE` in case no protocol has been set.
- * Otherwise, `RAWRTC_CODE_SUCCESS` will be returned and `*protocolp*
- * must be unreferenced.
- */
-enum rawrtc_code rawrtc_data_channel_parameters_get_protocol(
-    char** const protocolp, // de-referenced
-    struct rawrtc_data_channel_parameters* const parameters
-);
-
-/*
- * TODO
- * rawrtc_data_channel_parameters_get_negotiated
- * rawrtc_data_channel_parameters_get_id
- */
-
-/*
- * Create data channel options.
- *
- * `*optionsp` must be unreferenced.
- *
- * If `deliver_partially` is set to `true`, you will receive partial
- * messages. If set to `false`, messages will be reassembled before
- * delivery. If enabled, message chunks will be delivered until the
- * message is complete. Other messages' chunks WILL NOT be interleaved
- * on the same channel.
- */
-enum rawrtc_code rawrtc_data_channel_options_create(
-    struct rawrtc_data_channel_options** const optionsp, // de-referenced
-    bool const deliver_partially
-);
-
-/*
- * Create a data channel.
- * `*channelp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_data_channel_create(
-    struct rawrtc_data_channel** const channelp, // de-referenced
-    struct rawrtc_data_transport* const transport, // referenced
-    struct rawrtc_data_channel_parameters* const parameters, // referenced
-    struct rawrtc_data_channel_options* const options, // nullable, referenced
-    rawrtc_data_channel_open_handler* const open_handler, // nullable
-    rawrtc_data_channel_buffered_amount_low_handler* const buffered_amount_low_handler, // nullable
-    rawrtc_data_channel_error_handler* const error_handler, // nullable
-    rawrtc_data_channel_close_handler* const close_handler, // nullable
-    rawrtc_data_channel_message_handler* const message_handler, // nullable
-    void* const arg // nullable
-);
-
-/*
- * Set the argument of a data channel that is passed to the various
- * handlers.
- */
-enum rawrtc_code rawrtc_data_channel_set_arg(
-    struct rawrtc_data_channel* const channel,
-    void* const arg // nullable
-);
-
-/*
- * Set options on a data channel.
- *
- * Note: This function must be called directly after creation of the
- * data channel (either by explicitly creating it or implicitly in form
- * of the data channel handler callback) and before calling any other
- * data channel function.
- */
-enum rawrtc_code rawrtc_data_channel_set_options(
-    struct rawrtc_data_channel* const channel,
-    struct rawrtc_data_channel_options* options // nullable, referenced
-);
-
-/*
- * Send data via the data channel.
- */
-enum rawrtc_code rawrtc_data_channel_send(
-    struct rawrtc_data_channel* const channel,
-    struct mbuf* const buffer, // nullable (if empty message), referenced
-    bool const is_binary
-);
-
-/*
- * Close the data channel.
- */
-enum rawrtc_code rawrtc_data_channel_close(
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * TODO (from RTCDataChannel interface)
- * rawrtc_data_channel_get_transport
- * rawrtc_data_channel_get_ready_state
- * rawrtc_data_channel_get_buffered_amount
- * rawrtc_data_channel_get_buffered_amount_low_threshold
- * rawrtc_data_channel_set_buffered_amount_low_threshold
- */
-
-/*
- * Unset the handler argument and all handlers of the data channel.
- */
-enum rawrtc_code rawrtc_data_channel_unset_handlers(
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Get the data channel's parameters.
- * `*parametersp` must be unreferenced.
- */
-enum rawrtc_code rawrtc_data_channel_get_parameters(
-    struct rawrtc_data_channel_parameters** const parametersp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Set the data channel's open handler.
- */
-enum rawrtc_code rawrtc_data_channel_set_open_handler(
-    struct rawrtc_data_channel* const channel,
-    rawrtc_data_channel_open_handler* const open_handler // nullable
-);
-
-/*
- * Get the data channel's open handler.
- * Returns `RAWRTC_CODE_NO_VALUE` in case no handler has been set.
- */
-enum rawrtc_code rawrtc_data_channel_get_open_handler(
-    rawrtc_data_channel_open_handler** const open_handlerp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Set the data channel's buffered amount low handler.
- */
-enum rawrtc_code rawrtc_data_channel_set_buffered_amount_low_handler(
-    struct rawrtc_data_channel* const channel,
-    rawrtc_data_channel_buffered_amount_low_handler* const buffered_amount_low_handler // nullable
-);
-
-/*
- * Get the data channel's buffered amount low handler.
- * Returns `RAWRTC_CODE_NO_VALUE` in case no handler has been set.
- */
-enum rawrtc_code rawrtc_data_channel_get_buffered_amount_low_handler(
-    rawrtc_data_channel_buffered_amount_low_handler** const buffered_amount_low_handlerp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Set the data channel's error handler.
- */
-enum rawrtc_code rawrtc_data_channel_set_error_handler(
-    struct rawrtc_data_channel* const channel,
-    rawrtc_data_channel_error_handler* const error_handler // nullable
-);
-
-/*
- * Get the data channel's error handler.
- * Returns `RAWRTC_CODE_NO_VALUE` in case no handler has been set.
- */
-enum rawrtc_code rawrtc_data_channel_get_error_handler(
-    rawrtc_data_channel_error_handler** const error_handlerp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Set the data channel's close handler.
- */
-enum rawrtc_code rawrtc_data_channel_set_close_handler(
-    struct rawrtc_data_channel* const channel,
-    rawrtc_data_channel_close_handler* const close_handler // nullable
-);
-
-/*
- * Get the data channel's close handler.
- * Returns `RAWRTC_CODE_NO_VALUE` in case no handler has been set.
- */
-enum rawrtc_code rawrtc_data_channel_get_close_handler(
-    rawrtc_data_channel_close_handler** const close_handlerp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Set the data channel's message handler.
- */
-enum rawrtc_code rawrtc_data_channel_set_message_handler(
-    struct rawrtc_data_channel* const channel,
-    rawrtc_data_channel_message_handler* const message_handler // nullable
-);
-
-/*
- * Get the data channel's message handler.
- * Returns `RAWRTC_CODE_NO_VALUE` in case no handler has been set.
- */
-enum rawrtc_code rawrtc_data_channel_get_message_handler(
-    rawrtc_data_channel_message_handler** const message_handlerp, // de-referenced
-    struct rawrtc_data_channel* const channel
-);
-
-/*
- * Get the corresponding name for a data channel state.
- */
-char const * const rawrtc_data_channel_state_to_name(
-    enum rawrtc_data_channel_state const state
 );
 
 /*

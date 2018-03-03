@@ -1,11 +1,6 @@
 #include <rawrtc.h>
-#include "utils.h"
 #include "ice_candidate.h"
 #include "peer_connection_ice_candidate.h"
-
-#define DEBUG_MODULE "peer-connection-ice-candidate"
-//#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
 
 static char const sdp_ice_candidate_regex[] =
         "candidate:[^ ]+ [0-9]+ [^ ]+ [0-9]+ [^ ]+ [0-9]+ typ [^ ]+[^]*";
@@ -98,7 +93,7 @@ enum rawrtc_code rawrtc_peer_connection_ice_candidate_from_ortc_candidate(
     // Set fields
     candidate->candidate = mem_ref(ortc_candidate);
     candidate->mid = mem_ref(mid);
-    candidate->media_line_index = media_line_index ? *media_line_index : -1;
+    candidate->media_line_index = (int16_t) (media_line_index ? *media_line_index : -1);
     candidate->username_fragment = mem_ref(username_fragment);
 
     // Set pointer & done

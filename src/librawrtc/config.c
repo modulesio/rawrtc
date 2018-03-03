@@ -2,7 +2,7 @@
 #include "config.h"
 
 /*
- * Default rawrtc options.
+ * Default rawrtc configuration.
  */
 struct rawrtc_config rawrtc_default_config = {
     .pacing_interval = 20,

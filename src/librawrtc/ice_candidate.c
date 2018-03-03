@@ -1,11 +1,10 @@
 #include <netinet/in.h> // IPPROTO_UDP, IPPROTO_TCP
 #include <rawrtc.h>
 #include "ice_candidate.h"
-#include "utils.h"
 
 #define DEBUG_MODULE "ice-candidate"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 static enum rawrtc_ice_candidate_storage const map_enum_ice_candidate_storage[] = {
     RAWRTC_ICE_CANDIDATE_STORAGE_RAW,

@@ -1,7 +1,7 @@
+#include <rawrtcc/internal/certificate.h>
 #include <rawrtc.h>
 #include "ice_server.h"
 #include "ice_gather_options.h"
-#include "certificate.h"
 #include "ice_candidate.h"
 #include "dtls_transport.h"
 #include "peer_connection_description.h"
@@ -10,7 +10,7 @@
 
 #define DEBUG_MODULE "peer-connection"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 // Constants
 uint16_t const discard_port = 9;

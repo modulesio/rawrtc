@@ -1,15 +1,14 @@
 #include <string.h> // strlen
+#include <rawrtcdc/internal/sctp_capabilities.h>
 #include <rawrtc.h>
 #include "ice_parameters.h"
 #include "dtls_parameters.h"
-#include "REMOVEsctp_capabilities.h"
-#include "REMOVEsctp_transport.h"
 #include "peer_connection_description.h"
 #include "peer_connection_ice_candidate.h"
 
 #define DEBUG_MODULE "peer-connection-description"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 // Constants
 static uint16_t const discard_port = 9;
@@ -438,10 +437,17 @@ static enum rawrtc_code add_sctp_attributes(
     struct rawrtc_sctp_transport* const transport = context->data_transport->transport;
     enum rawrtc_code error;
     uint16_t sctp_port;
+    uint16_t sctp_n_streams;
     int err;
 
     // Get SCTP port
     error = rawrtc_sctp_transport_get_port(&sctp_port, transport);
+    if (error) {
+        return error;
+    }
+
+    // Get SCTP #streams
+    error = rawrtc_sctp_transport_get_n_streams(&sctp_n_streams, transport);
     if (error) {
         return error;
     }
@@ -497,7 +503,7 @@ static enum rawrtc_code add_sctp_attributes(
         // Set SCTP port, upper layer protocol and number of streams
         err = mbuf_printf(
                 sdp, "a=sctpmap:%"PRIu16" webrtc-datachannel %"PRIu16"\r\n",
-                sctp_port, RAWRTC_SCTP_TRANSPORT_DEFAULT_NUMBER_OF_STREAMS);
+                sctp_port, sctp_n_streams);
     }
     if (err) {
         return rawrtc_error_to_code(err);

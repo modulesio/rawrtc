@@ -4,7 +4,7 @@
 
 #define DEBUG_MODULE "ice-gather-options"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 /*
  * Destructor for an existing ICE gather options instance.

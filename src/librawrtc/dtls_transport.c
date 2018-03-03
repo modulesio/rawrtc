@@ -1,15 +1,16 @@
 #include <string.h> // memcmp
+#include <rawrtcc/internal/certificate.h>
+#include <rawrtcc/internal/message_buffer.h>
+#include <rawrtcc/internal/utils.h>
 #include <rawrtc.h>
+#include "config.h"
 #include "dtls_transport.h"
 #include "dtls_parameters.h"
-#include "message_buffer.h"
 #include "candidate_helper.h"
-#include "certificate.h"
-#include "utils.h"
 
 #define DEBUG_MODULE "dtls-transport"
 //#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
+#include <rawrtcc/internal/debug.h>
 
 /*
  * Embedded DH parameters in DER encoding (bits: 2048)

@@ -1,6 +1,26 @@
 #pragma once
 #include <rawrtc.h>
 
+struct rawrtc_dtls_transport {
+    enum rawrtc_dtls_transport_state state;
+    struct rawrtc_ice_transport* ice_transport; // referenced
+    struct list certificates; // deep-copied
+    rawrtc_dtls_transport_state_change_handler* state_change_handler; // nullable
+    rawrtc_dtls_transport_error_handler* error_handler; // nullable
+    void* arg; // nullable
+    struct rawrtc_dtls_parameters* remote_parameters; // referenced
+    enum rawrtc_dtls_role role;
+    bool connection_established;
+    struct list buffered_messages_in;
+    struct list buffered_messages_out;
+    struct list fingerprints;
+    struct tls* context;
+    struct dtls_sock* socket;
+    struct tls_conn* connection;
+    rawrtc_dtls_transport_receive_handler* receive_handler;
+    void* receive_handler_arg;
+};
+
 enum rawrtc_code rawrtc_dtls_transport_create_internal(
     struct rawrtc_dtls_transport** const transportp, // de-referenced
     struct rawrtc_ice_transport* const ice_transport, // referenced

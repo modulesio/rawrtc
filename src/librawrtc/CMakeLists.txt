@@ -21,8 +21,7 @@ set(rawrtc_SOURCES
         peer_connection_ice_candidate.c
         peer_connection_states.c
         REMOVEsctp_capabilities.c
-        REMOVEsctp_transport.c
-        utils.c)
+        REMOVEsctp_transport.c)
 
 # Library internal headers
 set(rawrtc_HEADERS
@@ -46,8 +45,7 @@ set(rawrtc_HEADERS
         peer_connection_ice_candidate.h
         peer_connection_states.h
         REMOVEsctp_capabilities.h
-        REMOVEsctp_transport.h
-        utils.h)
+        REMOVEsctp_transport.h)
 
 # Setup library (link & install)
 add_library(rawrtc SHARED ${rawrtc_SOURCES})

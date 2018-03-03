@@ -16,9 +16,9 @@ set(OPENSSL_VERSION "openssl >= 1.0.2")
 set(LIB_RE_VERSION "libre >= 0.5.7")
 set(LIB_REW_VERSION "librew >= 0.5.0")
 set(LIB_RAWRTCC_VERSION "librawrtcc >= 0.0.1")
+set(LIB_RAWRTCDC_VERSION "librawrtcdc >= 0.0.1")
 # Note: This MUST be here as cmake 3.5.0 overwrites LIB_RE_VERSION for some reason...
-set(DEPENDENCY_VERSIONS
-        "${OPENSSL_VERSION}, ${LIB_RE_VERSION}, ${LIB_REW_VERSION}, ${LIB_RAWRTCC_VERSION}")
+set(DEPENDENCY_VERSIONS "${OPENSSL_VERSION}, ${LIB_RE_VERSION}, ${LIB_REW_VERSION}, ${LIB_RAWRTCC_VERSION}, ${LIB_RAWRTCDC_VERSION}")
 
 # Debug build type as default
 if (NOT CMAKE_BUILD_TYPE)
@@ -88,6 +88,12 @@ pkg_check_modules(LIB_RAWRTCC REQUIRED ${LIB_RAWRTCC_VERSION})
 include_directories(${LIB_RAWRTCC_STATIC_INCLUDE_DIRS} ${LIB_RAWRTCC_INCLUDEDIR})
 link_directories(${LIB_RAWRTCC_STATIC_LIBRARY_DIRS})
 list(APPEND rawrtc_DEP_LIBRARIES ${LIB_RAWRTCC_STATIC_LIBRARIES})
+
+# Dependency: librawrtcdc
+pkg_check_modules(LIB_RAWRTCDC REQUIRED ${LIB_RAWRTCDC_VERSION})
+include_directories(${LIB_RAWRTCDC_STATIC_INCLUDE_DIRS} ${LIB_RAWRTCDC_INCLUDEDIR})
+link_directories(${LIB_RAWRTCDC_STATIC_LIBRARY_DIRS})
+list(APPEND rawrtc_DEP_LIBRARIES ${LIB_RAWRTCDC_STATIC_LIBRARIES})
 
 # Dependency versions
 set(PKG_CONFIG_REQUIRES "")

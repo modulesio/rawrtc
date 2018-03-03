@@ -5,6 +5,14 @@ enum {
     RAWRTC_PEER_CONNECTION_CANDIDATE_DEFAULT_SIZE = 256,
 };
 
+struct rawrtc_peer_connection_ice_candidate {
+    struct le le;
+    struct rawrtc_ice_candidate* candidate;
+    char* mid;
+    int16_t media_line_index;
+    char* username_fragment;
+};
+
 int rawrtc_peer_connection_ice_candidate_debug(
     struct re_printf* const pf,
     struct rawrtc_peer_connection_ice_candidate* const candidate

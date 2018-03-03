@@ -1,12 +1,8 @@
+#include <rawrtcc/internal/certificate.h>
+#include <rawrtcc/internal/utils.h>
 #include <rawrtc.h>
-#include "utils.h"
-#include "certificate.h"
 #include "ice_server.h"
 #include "peer_connection_configuration.h"
-
-#define DEBUG_MODULE "peer-connection-configuration"
-//#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
-#include "debug.h"
 
 /*
  * Destructor for an existing peer connection configuration.
