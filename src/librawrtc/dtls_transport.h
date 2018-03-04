@@ -1,6 +1,14 @@
 #pragma once
 #include <rawrtc.h>
 
+/*
+ * Handle inbound application data.
+ */
+typedef void (rawrtc_dtls_transport_receive_handler)(
+    struct mbuf* const buffer,
+    void* const arg
+);
+
 struct rawrtc_dtls_transport {
     enum rawrtc_dtls_transport_state state;
     struct rawrtc_ice_transport* ice_transport; // referenced
@@ -53,4 +61,14 @@ enum rawrtc_code rawrtc_dtls_transport_clear_data_transport(
 enum rawrtc_code rawrtc_dtls_transport_send(
     struct rawrtc_dtls_transport* const transport,
     struct mbuf* const buffer
+);
+
+enum rawrtc_code rawrtc_dtls_transport_get_external_role(
+    enum rawrtc_external_dtls_role* const rolep, // de-referenced
+    struct rawrtc_dtls_transport* const transport
+);
+
+enum rawrtc_code rawrtc_dtls_transport_get_external_state(
+    enum rawrtc_external_dtls_transport_state* const statep, // de-referenced
+    struct rawrtc_dtls_transport* const transport
 );

@@ -6,7 +6,6 @@
 #include "config.h"
 #include "ice_candidate.h"
 #include "candidate_helper.h"
-#include "ice_server.h"
 #include "ice_gather_options.h"
 #include "ice_gatherer.h"
 

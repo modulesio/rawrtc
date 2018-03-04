@@ -2,10 +2,6 @@
 set(rawrtc_SOURCES
         candidate_helper.c
         config.c
-        REMOVEdata_channel.c
-        REMOVEdata_channel_options.c
-        REMOVEdata_channel_parameters.c
-        REMOVEdata_transport.c
         dtls_parameters.c
         dtls_transport.c
         ice_candidate.c
@@ -20,16 +16,12 @@ set(rawrtc_SOURCES
         peer_connection_description.c
         peer_connection_ice_candidate.c
         peer_connection_states.c
-        REMOVEsctp_capabilities.c
-        REMOVEsctp_transport.c)
+        sctp_transport.c)
 
 # Library internal headers
 set(rawrtc_HEADERS
         candidate_helper.h
         config.h
-        REMOVEdata_channel_options.h
-        REMOVEdata_channel_parameters.h
-        REMOVEdata_transport.h
         dtls_parameters.h
         dtls_transport.h
         ice_candidate.h
@@ -44,8 +36,7 @@ set(rawrtc_HEADERS
         peer_connection_description.h
         peer_connection_ice_candidate.h
         peer_connection_states.h
-        REMOVEsctp_capabilities.h
-        REMOVEsctp_transport.h)
+        sctp_transport.h)
 
 # Setup library (link & install)
 add_library(rawrtc SHARED ${rawrtc_SOURCES})
@@ -69,7 +60,7 @@ endforeach ()
 configure_file(${CMAKE_SOURCE_DIR}/src/include/rawrtc_internal.h.cmakein
         ${internal_header_file} @ONLY)
 install(FILES ${rawrtc_HEADERS} DESTINATION include/rawrtc/internal)
-install(FILES ${internal_header_file} DESTINATION include/rawrtc/internal)
+install(FILES ${internal_header_file} DESTINATION include)
 
 # Generate pkg-config file & install it
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmakein

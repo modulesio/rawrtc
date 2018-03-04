@@ -3,6 +3,8 @@
 #include <rawrtc.h>
 #include "ice_parameters.h"
 #include "dtls_parameters.h"
+#include "peer_connection.h"
+#include "peer_connection_configuration.h"
 #include "peer_connection_description.h"
 #include "peer_connection_ice_candidate.h"
 
@@ -428,13 +430,13 @@ static enum rawrtc_code get_dtls_attributes(
  */
 static enum rawrtc_code add_sctp_attributes(
         struct mbuf* const sdp, // not checked
+        struct rawrtc_sctp_transport* const transport, // not checked
         struct rawrtc_peer_connection_context* const context, // not checked
         bool const offering,
         char const* const remote_media_line,
         char const* const mid,
         bool const sctp_sdp_05
 ) {
-    struct rawrtc_sctp_transport* const transport = context->data_transport->transport;
     enum rawrtc_code error;
     uint16_t sctp_port;
     uint16_t sctp_n_streams;
@@ -635,10 +637,12 @@ enum rawrtc_code rawrtc_peer_connection_description_create_internal(
         bool const offering
 ) {
     struct rawrtc_peer_connection_context* context;
-    struct rawrtc_peer_connection_description* local_description;
     struct rawrtc_peer_connection_description* remote_description;
-    struct mbuf* sdp = NULL;
+    struct rawrtc_peer_connection_description* local_description;
     enum rawrtc_code error;
+    struct mbuf* sdp = NULL;
+    enum rawrtc_data_transport_type data_transport_type;
+    void* data_transport = NULL;
 
     // Check arguments
     if (!descriptionp || !connection) {
@@ -648,8 +652,8 @@ enum rawrtc_code rawrtc_peer_connection_description_create_internal(
     // Get context
     context = &connection->context;
 
-    // Ensure a data transport has been set (when offering)
-    if (offering && !context->data_transport) {
+    // Ensure a data transport has been set (otherwise, there would be nothing to do)
+    if (!context->data_transport) {
         DEBUG_WARNING("No data transport set\n");
         return RAWRTC_CODE_NO_VALUE;
     }
@@ -718,12 +722,19 @@ enum rawrtc_code rawrtc_peer_connection_description_create_internal(
         goto out;
     }
 
-    // Add data transport (if any)
-    switch (context->data_transport->type) {
+    // Get data transport
+    error = rawrtc_data_transport_get_transport(
+            &data_transport_type, &data_transport, context->data_transport);
+    if (error) {
+        return error;
+    }
+
+    // Add data transport
+    switch (data_transport_type) {
         case RAWRTC_DATA_TRANSPORT_TYPE_SCTP:
             // Add SCTP transport
             error = add_sctp_attributes(
-                    sdp, context, offering, local_description->remote_media_line,
+                    sdp, data_transport, context, offering, local_description->remote_media_line,
                     local_description->mid, local_description->sctp_sdp_05);
             if (error) {
                 goto out;
@@ -744,6 +755,7 @@ enum rawrtc_code rawrtc_peer_connection_description_create_internal(
             rawrtc_peer_connection_description_debug, local_description);
 
 out:
+    mem_deref(data_transport);
     mem_deref(sdp);
     if (error) {
         mem_deref(local_description);

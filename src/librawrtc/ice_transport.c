@@ -1,6 +1,8 @@
 #include <rawrtc.h>
 #include "config.h"
+#include "ice_parameters.h"
 #include "ice_candidate.h"
+#include "ice_gatherer.h"
 #include "dtls_transport.h"
 #include "ice_transport.h"
 

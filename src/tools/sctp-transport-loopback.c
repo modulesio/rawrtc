@@ -1,5 +1,5 @@
 #include <rawrtc.h>
-#include "../librawrtc/REMOVEsctp_transport.h" /* TODO: Replace with <rawrtc_internal/sctp_transport.h> */
+#include "../librawrtc/sctp_transport.h" /* TODO: Replace with <rawrtc_internal/sctp_transport.h> */
 #include "helper/utils.h"
 #include "helper/handler.h"
 
