@@ -288,8 +288,7 @@ out:
 
         // Stop client & bye
         client_stop(client);
-        before_exit();
-        exit(0);
+        re_cancel();
     }
 }
 

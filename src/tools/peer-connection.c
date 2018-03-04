@@ -275,10 +275,8 @@ out:
         DEBUG_NOTICE("Exiting\n");
 
         // Stop client & bye
-        client_stop(client);
         tmr_cancel(&timer);
-        before_exit();
-        exit(0);
+        re_cancel();
     }
 }
 

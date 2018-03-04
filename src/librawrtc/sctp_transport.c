@@ -45,7 +45,7 @@ enum rawrtc_code sctp_transport_outbound_handler(
     (void) tos; (void) set_df;
 
     // Note: We only need to copy the buffer if we add it to the outgoing queue
-    if (dtls_transport->state == RAWRTC_EXTERNAL_DTLS_TRANSPORT_STATE_CONNECTED) {
+    if (dtls_transport->state == RAWRTC_DTLS_TRANSPORT_STATE_CONNECTED) {
         // Send
         error = rawrtc_dtls_transport_send(dtls_transport, buffer);
     } else {
