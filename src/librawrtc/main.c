@@ -2,7 +2,7 @@
 #include "main.h"
 
 #define DEBUG_MODULE "rawrtc-main"
-#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
+//#define RAWRTC_DEBUG_MODULE_LEVEL 7 // Note: Uncomment this to debug this module only
 #include <rawrtcc/internal/debug.h>
 
 struct rawrtc_global rawrtc_global;
